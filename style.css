@@ -1,0 +1,86 @@
+body {
+  font-family: 'Pretendard', 'Noto Sans KR', sans-serif;
+  background-color: #f2f2f2;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.title {
+  font-size: 3rem;
+  color: #1976ff;
+  margin-top: 40px;
+  margin-bottom: 30px;
+  letter-spacing: 2px;
+}
+
+.upload-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  background-color: #fff;
+  width: 80%;
+  max-width: 900px;
+  margin: 0 auto 30px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.1);
+}
+
+.file-btn {
+  background-color: #1976ff;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+#scanBtn {
+  background-color: #1976ff;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.result-box {
+  background-color: #fff;
+  width: 80%;
+  max-width: 900px;
+  margin: 0 auto 20px;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.result-box h2 {
+  color: #1976ff;
+  margin-bottom: 10px;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  font-family: monospace;
+  resize: none;
+  background-color: #fafafa;
+}
+
+footer {
+  background-color: #1976ff;
+  color: white;
+  padding: 10px;
+  font-weight: 500;
+  position: fixed;
+  width: 100%;
+  bottom: 0;
+}
