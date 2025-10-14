@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <title>문서 보안 스캔 데모</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root { --border:#e5e7eb; --muted:#666; --ok:#0a7f3f; --err:#c62828; --bg:#0b1020; --fg:#e6edf3; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
+    header { margin-bottom: 16px; }
+    .card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 16px; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    button { padding: 10px 14px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background:white; }
+    button:hover { background: #f7f7f7; }
+    .muted { color: var(--muted); font-size: 13px; }
+    pre { background: var(--bg); color: var(--fg); padding: 12px; border-radius: 8px; overflow: auto; }
+    .success { color: var(--ok); }
+    .error { color: var(--err); white-space: pre-wrap; }
+    .summary { white-space: pre-wrap; line-height: 1.5; }
+    .hint { font-size: 12px; color: #777; margin-top: 4px; }
+    .dropzone {
+      border: 2px dashed var(--border); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer;
+      transition: background .15s ease, border-color .15s ease;
+    }
+    .dropzone.dragover { background: #fafafa; border-color: #94a3b8; }
+    .filename { font-size: 13px; color:#333; margin-top:8px; }
+    input[type="file"] { display:none; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>문서 보안 스캔 데모</h1>
+  </header>
+
+  <section class="card">
+    <form id="upForm" data-endpoint="{{ request.url_for('scan_ms') }}">
+      <div id="dropzone" class="dropzone">
+        <strong>여기에 파일을 끌어다 놓으세요</strong><br/>
+        또는 <label for="fileInput" style="text-decoration:underline; cursor:pointer;">파일 선택</label>
+        <div class="filename" id="fileName"></div>
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <input id="fileInput" name="file" type="file"
+               accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.docm,.xlsm,.pptm,.hwp" />
+        <button type="submit">업로드 & 스캔</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="status" class="card" style="display:none;"></section>
+
+  <section id="summaryCard" class="card" style="display:none;">
+    <h3>LLM 요약</h3>
+    <div id="llmSummary" class="summary"></div>
+  </section>
+
+  <section id="analysisCard" class="card" style="display:none;">
+    <h3>원본 분석 결과 (JSON)</h3>
+    <pre id="analysisJson"></pre>
+  </section>
+
+  <script>
+    const form = document.getElementById('upForm');
+    const endpoint = form.dataset.endpoint;
+    const input = document.getElementById('fileInput');
+    const dropzone = document.getElementById('dropzone');
+    const fileNameEl = document.getElementById('fileName');
+    const statusEl = document.getElementById('status');
+    const summaryCard = document.getElementById('summaryCard');
+    const llmSummaryEl = document.getElementById('llmSummary');
+    const analysisCard = document.getElementById('analysisCard');
+    const analysisJsonEl = document.getElementById('analysisJson');
+
+    ['dragenter','dragover'].forEach(evt =>
+      dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); })
+    );
+    ['dragleave','drop'].forEach(evt =>
+      dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); })
+    );
+    dropzone.addEventListener('drop', e => {
+      const files = e.dataTransfer.files;
+      if (files && files[0]) {
+        input.files = files;
+        fileNameEl.textContent = files[0].name;
+      }
+    });
+    dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
+    input.addEventListener('change', () => {
+      const f = input.files && input.files[0];
+      fileNameEl.textContent = f ? f.name : '';
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const f = input.files && input.files[0];
+      if (!f) { alert('파일을 선택하세요.'); return; }
+
+      statusEl.style.display = 'block';
+      statusEl.className = 'card';
+      statusEl.innerHTML = '업로드 중...';
+
+      try {
+        const fd = new FormData();
+        fd.append('file', f, f.name);
+
+        const res = await fetch(endpoint, { method: 'POST', body: fd });
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error(`서버 오류: ${res.status}\n${text}`);
+        }
+        const data = await res.json();
+
+        statusEl.innerHTML = `<span class="success">완료</span> — <code>${(data.filename || f.name)}</code>`;
+
+        const llm = (data.llm_summary || '').trim();
+        if (llm) { llmSummaryEl.textContent = llm; summaryCard.style.display = 'block'; }
+        else { summaryCard.style.display = 'none'; }
+
+        analysisJsonEl.textContent = JSON.stringify(data.analysis, null, 2);
+        analysisCard.style.display = 'block';
+
+      } catch (err) {
+        statusEl.innerHTML = `<div class="error">${err.message || err}</div>`;
+        summaryCard.style.display = 'none';
+        analysisCard.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,129 +1,173 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" class="h-full">
 <head>
-  <meta charset="utf-8" />
-  <title>문서 보안 스캔 데모</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root { --border:#e5e7eb; --muted:#666; --ok:#0a7f3f; --err:#c62828; --bg:#0b1020; --fg:#e6edf3; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 24px; }
-    header { margin-bottom: 16px; }
-    .card { border: 1px solid var(--border); border-radius: 10px; padding: 16px; margin-top: 16px; }
-    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
-    button { padding: 10px 14px; border-radius: 8px; border: 1px solid #ddd; cursor: pointer; background:white; }
-    button:hover { background: #f7f7f7; }
-    .muted { color: var(--muted); font-size: 13px; }
-    pre { background: var(--bg); color: var(--fg); padding: 12px; border-radius: 8px; overflow: auto; }
-    .success { color: var(--ok); }
-    .error { color: var(--err); white-space: pre-wrap; }
-    .summary { white-space: pre-wrap; line-height: 1.5; }
-    .hint { font-size: 12px; color: #777; margin-top: 4px; }
-    .dropzone {
-      border: 2px dashed var(--border); border-radius: 12px; padding: 28px; text-align: center; cursor: pointer;
-      transition: background .15s ease, border-color .15s ease;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeScan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
     }
-    .dropzone.dragover { background: #fafafa; border-color: #94a3b8; }
-    .filename { font-size: 13px; color:#333; margin-top:8px; }
-    input[type="file"] { display:none; }
+  </script>
+  <style>
+    body { box-sizing: border-box; }
+    .nav-blur { backdrop-filter: blur(20px); background: rgba(18, 24, 33, 0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; }
+    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
+    .risk-high { color:#EF4444; background:rgba(239,68,68,.1); }
+    .risk-med  { color:#F59E0B; background:rgba(245,158,11,.1); }
+    .risk-low  { color:#6B7280; background:rgba(107,114,128,.1); }
   </style>
 </head>
-<body>
-  <header>
-    <h1>문서 보안 스캔 데모</h1>
-  </header>
-
-  <section class="card">
-    <form id="upForm" data-endpoint="{{ request.url_for('scan_ms') }}">
-      <div id="dropzone" class="dropzone">
-        <strong>여기에 파일을 끌어다 놓으세요</strong><br/>
-        또는 <label for="fileInput" style="text-decoration:underline; cursor:pointer;">파일 선택</label>
-        <div class="filename" id="fileName"></div>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white font-sans">
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex-shrink-0">
+          <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition" aria-label="홈으로 이동">SafeScan</a>
+        </div>
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/scan/office-hwp" class="nav-link">MS Office/HWP</a>
+          <a href="/pdf" class="nav-link">PDF</a>
+          <a href="/archive" class="nav-link">Archive</a>
+          <div class="w-px h-5 bg-white/10 mx-2"></div>
+          <a href="/login" class="nav-cta">로그인</a>
+          <a href="/signup" class="nav-cta">회원가입</a>
+        </div>
+        <div class="md:hidden">
+          <a href="/menu" class="p-2 rounded-lg hover:bg-white/5" aria-label="메뉴">\
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </a>
+        </div>
       </div>
-      <div class="row" style="margin-top:12px;">
-        <input id="fileInput" name="file" type="file"
-               accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.rtf,.docm,.xlsm,.pptm,.hwp" />
-        <button type="submit">업로드 & 스캔</button>
+    </div>
+  </nav>
+
+  <main class="pt-16">
+    <section class="py-20 px-4">
+      <div class="max-w-4xl mx-auto text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">누구나 쉽게,<br> 전문가처럼 검사하세요.</h1>
+        <p class="text-xl md:text-2xl text-gray-300">MS Office/HWP · PDF · Archive 정적 분석, 근거까지 투명하게.</p>
       </div>
-    </form>
-  </section>
+    </section>
 
-  <section id="status" class="card" style="display:none;"></section>
+    <section class="py-16 px-4 bg-dark-card/30">
+      <div class="max-w-6xl mx-auto">
+        <h2 class="text-3xl font-bold text-center mb-12">스캔 타입별 분석</h2>
+        <div class="grid md:grid-cols-3 gap-8">
+          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+            <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/30 transition-all">
+              <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">MS Office/HWP</h3>
+            <p class="text-gray-400 mb-6">간단 설명</p>
+            <a href="/office-hwp" class="w-full inline-block text-center py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">바로 스캔</a>
+          </div>
+          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+            <div class="w-16 h-16 bg-secondary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-secondary/30 transition-all">
+              <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">PDF</h3>
+            <p class="text-gray-400 mb-6">간단 설명</p>
+            <a href="/pdf" class="w-full inline-block text-center py-3 bg-secondary hover:bg-cyan-400 rounded-xl font-medium transition-all">바로 스캔</a>
+          </div>
+          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+            <div class="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-500/30 transition-all">
+              <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 01-2 2v5a2 2 0 01-2 2z"/></svg>
+            </div>
+            <h3 class="text-xl font-semibold mb-3">Archive</h3>
+            <p class="text-gray-400 mb-6">간단 설명</p>
+            <a href="/archive" class="w-full inline-block text-center py-3 bg-purple-500 hover:bg-purple-600 rounded-xl font-medium transition-all">바로 스캔</a>
+          </div>
+        </div>
+      </div>
+    </section>
 
-  <section id="summaryCard" class="card" style="display:none;">
-    <h3>LLM 요약</h3>
-    <div id="llmSummary" class="summary"></div>
-  </section>
+    <section class="py-16 px-4 bg-dark-card/30">
+      <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-2xl font-bold">최근 스캔</h2>
+          <a href="#" class="text-primary hover:text-secondary transition-colors">전체 보기</a>
+        </div>
+        <div class="bg-dark-card rounded-2xl border border-dark-border overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-dark-bg/50">
+                <tr>
+                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">파일명</th>
+                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">타입</th>
+                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">위험도</th>
+                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">분석 시각</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-dark-border">
+                <tr class="hover:bg-dark-bg/30 transition-colors">
+                  <td class="px-6 py-4 text-sm">suspicious_macro.docx</td>
+                  <td class="px-6 py-4 text-sm">MS Office/HWP</td>
+                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
+                  <td class="px-6 py-4 text-sm text-gray-400">2분 전</td>
+                </tr>
+                <tr class="hover:bg-dark-bg/30 transition-colors">
+                  <td class="px-6 py-4 text-sm">report.pdf</td>
+                  <td class="px-6 py-4 text-sm">PDF</td>
+                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
+                  <td class="px-6 py-4 text-sm text-gray-400">15분 전</td>
+                </tr>
+                <tr class="hover:bg-dark-bg/30 transition-colors">
+                  <td class="px-6 py-4 text-sm">archive.zip</td>
+                  <td class="px-6 py-4 text-sm">Archive</td>
+                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-med">Med</span></td>
+                  <td class="px-6 py-4 text-sm text-gray-400">1시간 전</td>
+                </tr>
+                <tr class="hover:bg-dark-bg/30 transition-colors">
+                  <td class="px-6 py-4 text-sm">proposal.hwp</td>
+                  <td class="px-6 py-4 text-sm">MS Office/HWP</td>
+                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
+                  <td class="px-6 py-4 text-sm text-gray-400">25분 전</td>
+                </tr>
+                <tr class="hover:bg-dark-bg/30 transition-colors">
+                  <td class="px-6 py-4 text-sm">malicious.pdf</td>
+                  <td class="px-6 py-4 text-sm">PDF</td>
+                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
+                  <td class="px-6 py-4 text-sm text-gray-400">3시간 전</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-  <section id="analysisCard" class="card" style="display:none;">
-    <h3>원본 분석 결과 (JSON)</h3>
-    <pre id="analysisJson"></pre>
-  </section>
+  <footer class="py-12 px-4 border-t border-dark-border">
+    <div class="max-w-6xl mx-auto text-center">
+      <div class="text-2xl font-semibold tracking-tight text-slate-100 mb-4">SafeScan</div>
+      <div class="flex justify-center space-x-6 text-sm text-gray-500">
+        <a href="#" class="hover:text-primary transition-colors">서비스 소개</a>
+        <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
+        <a href="#" class="hover:text-primary transition-colors">이용약관</a>
+        <a href="#" class="hover:text-primary transition-colors">고객지원</a>
+      </div>
+      <p class="text-xs text-gray-600 mt-4">© 2024 SafeScan. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
-    const form = document.getElementById('upForm');
-    const endpoint = form.dataset.endpoint;
-    const input = document.getElementById('fileInput');
-    const dropzone = document.getElementById('dropzone');
-    const fileNameEl = document.getElementById('fileName');
-    const statusEl = document.getElementById('status');
-    const summaryCard = document.getElementById('summaryCard');
-    const llmSummaryEl = document.getElementById('llmSummary');
-    const analysisCard = document.getElementById('analysisCard');
-    const analysisJsonEl = document.getElementById('analysisJson');
-
-    ['dragenter','dragover'].forEach(evt =>
-      dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('dragover'); })
-    );
-    ['dragleave','drop'].forEach(evt =>
-      dropzone.addEventListener(evt, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('dragover'); })
-    );
-    dropzone.addEventListener('drop', e => {
-      const files = e.dataTransfer.files;
-      if (files && files[0]) {
-        input.files = files;
-        fileNameEl.textContent = files[0].name;
-      }
-    });
-    dropzone.addEventListener('click', () => document.getElementById('fileInput').click());
-    input.addEventListener('change', () => {
-      const f = input.files && input.files[0];
-      fileNameEl.textContent = f ? f.name : '';
-    });
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const f = input.files && input.files[0];
-      if (!f) { alert('파일을 선택하세요.'); return; }
-
-      statusEl.style.display = 'block';
-      statusEl.className = 'card';
-      statusEl.innerHTML = '업로드 중...';
-
-      try {
-        const fd = new FormData();
-        fd.append('file', f, f.name);
-
-        const res = await fetch(endpoint, { method: 'POST', body: fd });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(`서버 오류: ${res.status}\n${text}`);
-        }
-        const data = await res.json();
-
-        statusEl.innerHTML = `<span class="success">완료</span> — <code>${(data.filename || f.name)}</code>`;
-
-        const llm = (data.llm_summary || '').trim();
-        if (llm) { llmSummaryEl.textContent = llm; summaryCard.style.display = 'block'; }
-        else { summaryCard.style.display = 'none'; }
-
-        analysisJsonEl.textContent = JSON.stringify(data.analysis, null, 2);
-        analysisCard.style.display = 'block';
-
-      } catch (err) {
-        statusEl.innerHTML = `<div class="error">${err.message || err}</div>`;
-        summaryCard.style.display = 'none';
-        analysisCard.style.display = 'none';
-      }
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) navbar.classList.add('nav-blur');
+      else navbar.classList.remove('nav-blur');
     });
   </script>
 </body>
