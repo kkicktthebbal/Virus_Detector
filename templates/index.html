@@ -31,144 +31,158 @@
   </style>
 </head>
 <body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white font-sans">
-  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex justify-between items-center h-16">
-        <div class="flex-shrink-0">
-          <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition" aria-label="홈으로 이동">SafeScan</a>
+<nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex-shrink-0">
+        <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition" aria-label="홈으로 이동">SafeScan</a>
+      </div>
+
+      {% if user %}
+      <div class="hidden md:flex items-center space-x-1">
+        <a href="/scan/office-hwp" class="nav-link">MS Office/HWP</a>
+        <a href="/pdf" class="nav-link">PDF</a>
+        <a href="/archive" class="nav-link">임시</a>
+        <div class="w-px h-5 bg-white/10 mx-4"></div>
+        <span class="text-sm text-gray-200 pl-1 pr-2">{{ user.name }}님</span>
+        <a href="/my/scans" class="nav-cta ml-2">내 스캔 기록</a>
+        <form method="post" action="/logout">
+          <button class="nav-cta" type="submit">로그아웃</button>
+        </form>
+      </div>
+      {% else %}
+      <div class="hidden md:flex items-center space-x-1">
+        <a href="/login" class="nav-cta">로그인</a>
+        <a href="/signup" class="nav-cta">회원가입</a>
+      </div>
+      {% endif %}
+
+      <div class="md:hidden">
+        <button id="mobileMenuBtn" class="p-2 rounded-lg hover:bg-white/5" aria-label="메뉴">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-16">
+  <section class="py-20 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">누구나 쉽게,<br> 전문가처럼 검사하세요.</h1>
+      <p class="text-xl md:text-2xl text-gray-300">MS Office/HWP · PDF · Archive 정적 분석, 근거까지 투명하게.</p>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-dark-card/30">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12">스캔 타입별 분석</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+          <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/30 transition-all">
+            <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">MS Office/HWP</h3>
+          <p class="text-gray-400 mb-6">간단 설명</p>
+          <a href="/scan/office-hwp" class="w-full inline-block text-center py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">바로 스캔</a>
         </div>
-        <div class="hidden md:flex items-center space-x-1">
-          <a href="/scan/office-hwp" class="nav-link">MS Office/HWP</a>
-          <a href="/pdf" class="nav-link">PDF</a>
-          <a href="/archive" class="nav-link">Archive</a>
-          <div class="w-px h-5 bg-white/10 mx-2"></div>
-          <a href="/login" class="nav-cta">로그인</a>
-          <a href="/signup" class="nav-cta">회원가입</a>
+        <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+          <div class="w-16 h-16 bg-secondary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-secondary/30 transition-all">
+            <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">PDF</h3>
+          <p class="text-gray-400 mb-6">간단 설명</p>
+          <a href="/pdf" class="w-full inline-block text-center py-3 bg-secondary hover:bg-cyan-400 rounded-xl font-medium transition-all">바로 스캔</a>
         </div>
-        <div class="md:hidden">
-          <a href="/menu" class="p-2 rounded-lg hover:bg-white/5" aria-label="메뉴">\
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </a>
+        <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
+          <div class="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-500/30 transition-all">
+            <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 01-2 2v5a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="text-xl font-semibold mb-3">임시</h3>
+          <p class="text-gray-400 mb-6">간단 설명</p>
+          <a href="/archive" class="w-full inline-block text-center py-3 bg-purple-500 hover:bg-purple-600 rounded-xl font-medium transition-all">바로 스캔</a>
         </div>
       </div>
     </div>
-  </nav>
+  </section>
 
-  <main class="pt-16">
-    <section class="py-20 px-4">
-      <div class="max-w-4xl mx-auto text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">누구나 쉽게,<br> 전문가처럼 검사하세요.</h1>
-        <p class="text-xl md:text-2xl text-gray-300">MS Office/HWP · PDF · Archive 정적 분석, 근거까지 투명하게.</p>
+  <section class="py-16 px-4 bg-dark-card/30">
+    <div class="max-w-6xl mx-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold">최근 스캔</h2>
+        <a href="/my/scans" class="text-primary hover:text-secondary transition-colors">전체 보기</a>
       </div>
-    </section>
-
-    <section class="py-16 px-4 bg-dark-card/30">
-      <div class="max-w-6xl mx-auto">
-        <h2 class="text-3xl font-bold text-center mb-12">스캔 타입별 분석</h2>
-        <div class="grid md:grid-cols-3 gap-8">
-          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
-            <div class="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-primary/30 transition-all">
-              <svg class="w-8 h-8 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">MS Office/HWP</h3>
-            <p class="text-gray-400 mb-6">간단 설명</p>
-            <a href="/office-hwp" class="w-full inline-block text-center py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">바로 스캔</a>
-          </div>
-          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
-            <div class="w-16 h-16 bg-secondary/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-secondary/30 transition-all">
-              <svg class="w-8 h-8 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">PDF</h3>
-            <p class="text-gray-400 mb-6">간단 설명</p>
-            <a href="/pdf" class="w-full inline-block text-center py-3 bg-secondary hover:bg-cyan-400 rounded-xl font-medium transition-all">바로 스캔</a>
-          </div>
-          <div class="bg-dark-card rounded-2xl p-8 border border-dark-border hover:border-primary/50 transition-all group">
-            <div class="w-16 h-16 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6 group-hover:bg-purple-500/30 transition-all">
-              <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 01-2 2v5a2 2 0 01-2 2z"/></svg>
-            </div>
-            <h3 class="text-xl font-semibold mb-3">Archive</h3>
-            <p class="text-gray-400 mb-6">간단 설명</p>
-            <a href="/archive" class="w-full inline-block text-center py-3 bg-purple-500 hover:bg-purple-600 rounded-xl font-medium transition-all">바로 스캔</a>
-          </div>
+      <div class="bg-dark-card rounded-2xl border border-dark-border overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-dark-bg/50">
+              <tr>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">파일명</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">타입</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">위험도</th>
+                <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">분석 시각</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-dark-border">
+              <tr class="hover:bg-dark-bg/30 transition-colors">
+                <td class="px-6 py-4 text-sm">suspicious_macro.docx</td>
+                <td class="px-6 py-4 text-sm">MS Office/HWP</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
+                <td class="px-6 py-4 text-sm text-gray-400">2분 전</td>
+              </tr>
+              <tr class="hover:bg-dark-bg/30 transition-colors">
+                <td class="px-6 py-4 text-sm">report.pdf</td>
+                <td class="px-6 py-4 text-sm">PDF</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
+                <td class="px-6 py-4 text-sm text-gray-400">15분 전</td>
+              </tr>
+              <tr class="hover:bg-dark-bg/30 transition-colors">
+                <td class="px-6 py-4 text-sm">archive.zip</td>
+                <td class="px-6 py-4 text-sm">Archive</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-med">Med</span></td>
+                <td class="px-6 py-4 text-sm text-gray-400">1시간 전</td>
+              </tr>
+              <tr class="hover:bg-dark-bg/30 transition-colors">
+                <td class="px-6 py-4 text-sm">proposal.hwp</td>
+                <td class="px-6 py-4 text-sm">MS Office/HWP</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
+                <td class="px-6 py-4 text-sm text-gray-400">25분 전</td>
+              </tr>
+              <tr class="hover:bg-dark-bg/30 transition-colors">
+                <td class="px-6 py-4 text-sm">malicious.pdf</td>
+                <td class="px-6 py-4 text-sm">PDF</td>
+                <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
+                <td class="px-6 py-4 text-sm text-gray-400">3시간 전</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
-    </section>
-
-    <section class="py-16 px-4 bg-dark-card/30">
-      <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-bold">최근 스캔</h2>
-          <a href="#" class="text-primary hover:text-secondary transition-colors">전체 보기</a>
-        </div>
-        <div class="bg-dark-card rounded-2xl border border-dark-border overflow-hidden">
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <thead class="bg-dark-bg/50">
-                <tr>
-                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">파일명</th>
-                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">타입</th>
-                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">위험도</th>
-                  <th class="px-6 py-4 text-left text-sm font-medium text-gray-400">분석 시각</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-dark-border">
-                <tr class="hover:bg-dark-bg/30 transition-colors">
-                  <td class="px-6 py-4 text-sm">suspicious_macro.docx</td>
-                  <td class="px-6 py-4 text-sm">MS Office/HWP</td>
-                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
-                  <td class="px-6 py-4 text-sm text-gray-400">2분 전</td>
-                </tr>
-                <tr class="hover:bg-dark-bg/30 transition-colors">
-                  <td class="px-6 py-4 text-sm">report.pdf</td>
-                  <td class="px-6 py-4 text-sm">PDF</td>
-                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
-                  <td class="px-6 py-4 text-sm text-gray-400">15분 전</td>
-                </tr>
-                <tr class="hover:bg-dark-bg/30 transition-colors">
-                  <td class="px-6 py-4 text-sm">archive.zip</td>
-                  <td class="px-6 py-4 text-sm">Archive</td>
-                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-med">Med</span></td>
-                  <td class="px-6 py-4 text-sm text-gray-400">1시간 전</td>
-                </tr>
-                <tr class="hover:bg-dark-bg/30 transition-colors">
-                  <td class="px-6 py-4 text-sm">proposal.hwp</td>
-                  <td class="px-6 py-4 text-sm">MS Office/HWP</td>
-                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-low">Low</span></td>
-                  <td class="px-6 py-4 text-sm text-gray-400">25분 전</td>
-                </tr>
-                <tr class="hover:bg-dark-bg/30 transition-colors">
-                  <td class="px-6 py-4 text-sm">malicious.pdf</td>
-                  <td class="px-6 py-4 text-sm">PDF</td>
-                  <td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-medium risk-high">High</span></td>
-                  <td class="px-6 py-4 text-sm text-gray-400">3시간 전</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="py-12 px-4 border-t border-dark-border">
-    <div class="max-w-6xl mx-auto text-center">
-      <div class="text-2xl font-semibold tracking-tight text-slate-100 mb-4">SafeScan</div>
-      <div class="flex justify-center space-x-6 text-sm text-gray-500">
-        <a href="#" class="hover:text-primary transition-colors">서비스 소개</a>
-        <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
-        <a href="#" class="hover:text-primary transition-colors">이용약관</a>
-        <a href="#" class="hover:text-primary transition-colors">고객지원</a>
-      </div>
-      <p class="text-xs text-gray-600 mt-4">© 2024 SafeScan. All rights reserved.</p>
     </div>
-  </footer>
+  </section>
+</main>
 
-  <script>
-    window.addEventListener('scroll', () => {
-      const navbar = document.getElementById('navbar');
-      if (window.scrollY > 50) navbar.classList.add('nav-blur');
-      else navbar.classList.remove('nav-blur');
-    });
-  </script>
+<footer class="py-12 px-4 border-t border-dark-border">
+  <div class="max-w-6xl mx-auto text-center">
+    <div class="text-2xl font-semibold tracking-tight text-slate-100 mb-4">SafeScan</div>
+    <div class="flex justify-center space-x-6 text-sm text-gray-500">
+      <a href="#" class="hover:text-primary transition-colors">서비스 소개</a>
+      <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
+      <a href="#" class="hover:text-primary transition-colors">이용약관</a>
+      <a href="#" class="hover:text-primary transition-colors">고객지원</a>
+    </div>
+    <p class="text-xs text-gray-600 mt-4">© 2024 SafeScan. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    if (window.scrollY > 50) navbar.classList.add('nav-blur');
+    else navbar.classList.remove('nav-blur');
+  });
+</script>
 </body>
 </html>
