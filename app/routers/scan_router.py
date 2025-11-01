@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from app.LLM.gemini import generate
 from fastapi.responses import HTMLResponse
+from Info_Maker.Malicious_Analysis_fun import analyze_file
 
 router = APIRouter(
     prefix = "/scan"
@@ -31,24 +32,12 @@ async def scan_ms(requset: Request, file: UploadFile = File(...)):
     with open(save_path, "wb") as f:
         f.write(content)
     
-    # 찬후님 다시 해줘요
-    result = subprocess.run(
-    [sys.executable, "-m", "oletools.olevba", "--json", save_path],
-    capture_output=True,
-    text=False,      
-    check=True
-    )
+    analysis_result = analyze_file(save_path)
 
-    raw = result.stdout or result.stderr or b""
-    out = raw.decode("utf-8", errors="replace")
-    analysis = json.loads(out)
-    # 여기까지
-
-
-    llm_summary = generate(analysis)
+    llm_summary = generate(analysis_result)
 
     return {
         "file": file.filename,
-        "analysis": analysis,
+        "analysis": analysis_result,
         "llm_summary": llm_summary
     }
