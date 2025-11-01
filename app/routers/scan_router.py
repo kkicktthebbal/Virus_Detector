@@ -18,9 +18,10 @@ templates = Jinja2Templates(directory="templates")
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UPLOAD_DIR = os.path.join(BASE_DIR, "static", "file")
+
 @router.get("/office-hwp", response_class=HTMLResponse)
 def index_page(request: Request):
-        return templates.TemplateResponse("ms.html", {"request": request})
+        return templates.TemplateResponse("ms3.html", {"request": request})
 
 
 @router.post("/ms")

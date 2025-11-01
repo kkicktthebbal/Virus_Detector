@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MS Office/HWP 스캔 - SafeScan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { box-sizing: border-box; }
+    .nav-blur { backdrop-filter: blur(20px); background: rgba(18, 24, 33, 0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; }
+    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .animate-spin { animation: spin 1s linear infinite; }
+    
+    .upload-area {
+      border: 2px dashed rgba(59,163,255,0.3);
+      background: rgba(59,163,255,0.05);
+      transition: all 0.3s;
+    }
+    .upload-area:hover {
+      border-color: #3BA3FF;
+      background: rgba(59,163,255,0.1);
+    }
+    
+    .upload-area.dragover {
+      border-color: #3BA3FF;
+      background: rgba(59,163,255,0.15);
+      transform: scale(1.02);
+    }
+    
+    .progress-circle {
+      transform: rotate(-90deg);
+    }
+    
+    .score-circle {
+      transition: stroke-dashoffset 1s ease-in-out;
+    }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white font-sans">
+<nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <div class="flex-shrink-0">
+        <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition">SafeScan</a>
+      </div>
+      <div class="hidden md:flex items-center space-x-1">
+        <a href="/" class="nav-link">홈</a>
+        <div class="w-px h-5 bg-white/10 mx-4"></div>
+        <a href="/login" class="nav-cta">로그인</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-24 pb-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        MS Office / HWP 파일 분석
+      </h1>
+      <p class="text-gray-400 text-lg">악성 코드 및 매크로를 검사합니다</p>
+    </div>
+
+    <!-- Upload Area -->
+    <div id="uploadArea" class="upload-area rounded-3xl p-12 mb-8 cursor-pointer">
+      <input type="file" id="fileInput" accept=".doc,.docx,.xls,.xlsx,.ppt,.pptx,.hwp,.hwt" class="hidden">
+      <div class="text-center">
+        <svg class="w-20 h-20 mx-auto mb-6 text-primary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+        </svg>
+        <h3 class="text-2xl font-semibold mb-3">파일을 업로드하세요</h3>
+        <p class="text-gray-400 mb-6">드래그 앤 드롭 또는 클릭하여 파일 선택</p>
+        <p class="text-sm text-gray-500">지원 형식: DOC, DOCX, XLS, XLSX, PPT, PPTX, HWP, HWT</p>
+      </div>
+    </div>
+
+    <!-- Uploading Status -->
+    <div id="uploadingStatus" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border mb-8">
+      <div class="flex items-center justify-center">
+        <svg class="animate-spin h-12 w-12 text-primary mr-4" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        <div>
+          <h3 class="text-xl font-semibold mb-1">파일을 분석 중입니다...</h3>
+          <p class="text-gray-400">잠시만 기다려주세요</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Area -->
+    <div id="resultArea" class="hidden">
+      <!-- Score Circle and Risk Level -->
+      <div class="bg-dark-card rounded-2xl p-8 border border-dark-border mb-6">
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          <!-- Circular Progress -->
+          <div class="relative" style="width: 200px; height: 200px;">
+            <svg class="progress-circle w-full h-full" viewBox="0 0 100 100">
+              <!-- Background circle -->
+              <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.1)" stroke-width="8" fill="none"></circle>
+              <!-- Progress circle -->
+              <circle id="scoreCircle" class="score-circle" cx="50" cy="50" r="45" 
+                      stroke="url(#gradient)" stroke-width="8" 
+                      fill="none" stroke-linecap="round"
+                      stroke-dasharray="283"
+                      stroke-dashoffset="283"></circle>
+              <!-- Gradient definition -->
+              <defs>
+                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:#10B981;stop-opacity:1" />
+                  <stop offset="50%" style="stop-color:#F59E0B;stop-opacity:1" />
+                  <stop offset="100%" style="stop-color:#EF4444;stop-opacity:1" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <div id="scoreText" class="text-5xl font-bold mb-1">0</div>
+                <div class="text-xs text-gray-400">점</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Risk Level -->
+          <div class="flex-1 text-center md:text-left">
+            <h2 class="text-3xl font-bold mb-4">악성 위험도</h2>
+            <div id="riskBadge" class="inline-block mb-4">
+              <!-- Will be filled dynamically -->
+            </div>
+            <p id="riskDescription" class="text-gray-300 text-lg">
+              <!-- Will be filled dynamically -->
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Analysis Details -->
+      <div class="grid md:grid-cols-2 gap-6 mb-6">
+        <!-- Risk Factors -->
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold">발견된 위험 요인</h3>
+          </div>
+          <ul id="riskReasons" class="space-y-3">
+            <!-- Will be filled dynamically -->
+          </ul>
+        </div>
+
+        <!-- Recommended Actions -->
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border">
+          <div class="flex items-center mb-4">
+            <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+            </div>
+            <h3 class="text-xl font-semibold">권장 조치</h3>
+          </div>
+          <ul id="recommendedActions" class="space-y-3">
+            <!-- Will be filled dynamically -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- Summary Card -->
+      <div class="bg-dark-card rounded-2xl p-6 border border-dark-border">
+        <h3 class="text-xl font-semibold mb-4">분석 요약</h3>
+        <p id="summaryText" class="text-gray-300 leading-relaxed">
+          <!-- Will be filled dynamically -->
+        </p>
+      </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-8 text-center">
+      <a href="/" class="inline-flex items-center text-primary hover:text-secondary transition-colors">
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+        </svg>
+        홈으로 돌아가기
+      </a>
+    </div>
+  </div>
+</main>
+
+<footer class="py-8 px-4 border-t border-dark-border bg-dark-card">
+  <div class="max-w-6xl mx-auto text-center text-sm text-gray-500">
+    © 2024 SafeScan. All rights reserved.
+  </div>
+</footer>
+
+<script>
+  // File upload handling
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const uploadingStatus = document.getElementById('uploadingStatus');
+  const resultArea = document.getElementById('resultArea');
+  
+  const scoreCircle = document.getElementById('scoreCircle');
+  const scoreText = document.getElementById('scoreText');
+  const riskBadge = document.getElementById('riskBadge');
+  const riskDescription = document.getElementById('riskDescription');
+  const riskReasons = document.getElementById('riskReasons');
+  const recommendedActions = document.getElementById('recommendedActions');
+  const summaryText = document.getElementById('summaryText');
+
+  uploadArea.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', handleFileSelect);
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  });
+
+  function handleFileSelect(e) {
+    const file = e.target.files[0];
+    if (file) {
+      handleFileUpload(file);
+    }
+  }
+
+  async function handleFileUpload(file) {
+    // Validate file type
+    const validTypes = ['.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.hwp', '.hwt'];
+    const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+    
+    if (!validTypes.includes(fileExt)) {
+      alert('지원하지 않는 파일 형식입니다.');
+      return;
+    }
+
+    // Hide upload area, show uploading status
+    uploadArea.classList.add('hidden');
+    uploadingStatus.classList.remove('hidden');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch('/scan/ms', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('분석 중 오류가 발생했습니다.');
+      }
+
+      const result = await response.json();
+      
+      // Hide uploading status, show result
+      uploadingStatus.classList.add('hidden');
+      resultArea.classList.remove('hidden');
+      
+      // Display results
+      displayResults(result);
+
+    } catch (error) {
+      console.error('Error:', error);
+      alert('파일 분석 중 오류가 발생했습니다.');
+      uploadingStatus.classList.add('hidden');
+      uploadArea.classList.remove('hidden');
+    }
+  }
+
+  function displayResults(result) {
+    try {
+      // Parse LLM summary JSON
+      let summary;
+      try {
+        summary = JSON.parse(result.llm_summary);
+      } catch (parseError) {
+        console.error('LLM summary parse error:', parseError);
+        console.error('Raw LLM summary:', result.llm_summary);
+        // Fallback: try to extract JSON from markdown code blocks or text
+        const jsonMatch = result.llm_summary.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          summary = JSON.parse(jsonMatch[0]);
+        } else {
+          throw new Error('Could not parse LLM summary');
+        }
+      }
+      
+      const score = summary.risk_score || 0;
+      const level = summary.risk_level || 'low';
+      
+      // Update circular progress
+      const circumference = 2 * Math.PI * 45;
+      const offset = circumference - (score / 100) * circumference;
+      scoreCircle.style.strokeDashoffset = offset;
+      scoreText.textContent = score;
+      
+      // Update risk badge and description
+      const riskConfig = {
+        low: { color: 'text-green-500', bg: 'bg-green-500/10', border: 'border-green-500/30', text: '낮음' },
+        medium: { color: 'text-yellow-500', bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: '보통' },
+        high: { color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/30', text: '높음' }
+      };
+      
+      const config = riskConfig[level] || riskConfig.low;
+      
+      riskBadge.innerHTML = `
+        <div class="px-4 py-2 rounded-full border ${config.border} ${config.bg} inline-flex items-center">
+          <span class="text-2xl font-bold ${config.color}">${config.text}</span>
+        </div>
+      `;
+      
+      riskDescription.textContent = getRiskDescription(level);
+      
+      // Update risk reasons
+      if (summary.reasons && Array.isArray(summary.reasons) && summary.reasons.length > 0) {
+        riskReasons.innerHTML = summary.reasons.map(reason => `
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-red-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            <span class="text-gray-300">${reason}</span>
+          </li>
+        `).join('');
+      } else {
+        riskReasons.innerHTML = '<li class="text-gray-500 italic">발견된 위험 요인이 없습니다.</li>';
+      }
+      
+      // Update recommended actions
+      if (summary.recommended_actions && Array.isArray(summary.recommended_actions) && summary.recommended_actions.length > 0) {
+        recommendedActions.innerHTML = summary.recommended_actions.map(action => `
+          <li class="flex items-start">
+            <svg class="w-5 h-5 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+            <span class="text-gray-300">${action}</span>
+          </li>
+        `).join('');
+      } else {
+        recommendedActions.innerHTML = '<li class="text-gray-500 italic">권장 조치가 없습니다.</li>';
+      }
+      
+      // Update summary
+      if (summary.summary) {
+        summaryText.textContent = summary.summary;
+      } else {
+        summaryText.textContent = '분석 결과를 요약할 수 없습니다.';
+      }
+      
+    } catch (error) {
+      console.error('Error parsing results:', error);
+      alert('결과를 표시하는 중 오류가 발생했습니다.');
+    }
+  }
+
+  function getRiskDescription(level) {
+    const descriptions = {
+      low: '이 파일은 위험도가 낮습니다. 일반적으로 안전합니다.',
+      medium: '이 파일은 중간 수준의 위험도를 가지고 있습니다. 주의가 필요합니다.',
+      high: '이 파일은 높은 위험도를 가지고 있습니다. 신뢰할 수 있는 출처가 아니면 열지 마세요.'
+    };
+    return descriptions[level] || descriptions.low;
+  }
+
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    const navbar = document.getElementById('navbar');
+    if (window.scrollY > 50) navbar.classList.add('nav-blur');
+    else navbar.classList.remove('nav-blur');
+  });
+</script>
+</body>
+</html>
+
