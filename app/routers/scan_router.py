@@ -7,6 +7,8 @@ from fastapi import APIRouter, UploadFile, File
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from app.LLM.gemini import generate
+from fastapi.responses import HTMLResponse
+from Info_Maker.Malicious_Analysis_fun import analyze_file
 
 router = APIRouter(
     prefix = "/scan"
@@ -17,6 +19,11 @@ templates = Jinja2Templates(directory="templates")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 UPLOAD_DIR = os.path.join(BASE_DIR, "static", "file")
 
+@router.get("/office-hwp", response_class=HTMLResponse)
+def index_page(request: Request):
+        return templates.TemplateResponse("ms3.html", {"request": request})
+
+
 @router.post("/ms")
 async def scan_ms(requset: Request, file: UploadFile = File(...)):
 
@@ -26,24 +33,12 @@ async def scan_ms(requset: Request, file: UploadFile = File(...)):
     with open(save_path, "wb") as f:
         f.write(content)
     
-    # 찬후님 다시 해줘요
-    result = subprocess.run(
-    [sys.executable, "-m", "oletools.olevba", "--json", save_path],
-    capture_output=True,
-    text=False,      
-    check=True
-    )
+    analysis_result = analyze_file(save_path)
 
-    raw = result.stdout or result.stderr or b""
-    out = raw.decode("utf-8", errors="replace")
-    analysis = json.loads(out)
-    # 여기까지
-
-
-    llm_summary = generate(analysis)
+    llm_summary = generate(analysis_result)
 
     return {
         "file": file.filename,
-        "analysis": analysis,
+        "analysis": analysis_result,
         "llm_summary": llm_summary
     }

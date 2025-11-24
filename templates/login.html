@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeScan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { box-sizing: border-box; }
+    .nav-blur { backdrop-filter: blur(20px); background: rgba(18, 24, 33, 0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; }
+    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
+    .input { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+    .input:focus { outline: none; border-color: #3BA3FF; box-shadow: 0 0 0 3px rgba(59,163,255,.2); }
+    .btn { transition: .15s; }
+    .btn-primary { background: #3BA3FF; }
+    .btn-primary:hover { background: #2f8ee0; }
+    .btn-outline { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
+    .btn-outline:hover { border-color: rgba(255,255,255,.2); background: rgba(255,255,255,.08); }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white font-sans flex flex-col min-h-screen">
+  <nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex-shrink-0">
+          <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition" aria-label="홈으로 이동">SafeScan</a>
+        </div>
+        <div class="hidden md:flex items-center space-x-1">
+          <a href="/scan/office-hwp" class="nav-link">MS Office/HWP</a>
+          <a href="/pdf" class="nav-link">PDF</a>
+          <a href="/archive" class="nav-link">임시</a>
+          <div class="w-px h-5 bg-white/10 mx-2"></div>
+          <a href="/login" class="nav-cta">로그인</a>
+          <a href="/signup" class="nav-cta">회원가입</a>
+        </div>
+        <div class="md:hidden">
+          <a href="/menu" class="p-2 rounded-lg hover:bg-white/5" aria-label="메뉴">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="flex-grow pt-16 flex items-center justify-center">
+    <section class="w-full px-4 py-16">
+      <div class="max-w-md mx-auto">
+        <div class="bg-dark-card/50 border border-dark-border rounded-2xl p-8 shadow-xl">
+          <div class="text-center mb-8">
+            <h1 class="text-2xl font-bold">로그인</h1>
+          </div>
+
+          <form action="/login" method="POST" class="space-y-5" autocomplete="on">
+            <div>
+              <label for="user_id" class="block text-sm text-gray-300 mb-2">아이디</label>
+              <input id="user_id" name="user_id" type="text" required class="input w-full rounded-lg px-4 py-3 text-sm placeholder:text-gray-500" placeholder="아이디를 입력하세요" />
+            </div>
+            <div>
+              <label for="password" class="block text-sm text-gray-300 mb-2">비밀번호</label>
+              <input id="password" name="password" type="password" required class="input w-full rounded-lg px-4 py-3 text-sm placeholder:text-gray-500" placeholder="비밀번호를 입력하세요" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full rounded-xl py-3 font-medium">로그인</button>
+          </form>
+
+          <div class="my-6 flex items-center gap-4 text-xs text-gray-500">
+            <div class="flex-1 h-px bg-white/10"></div>
+            <span>또는</span>
+            <div class="flex-1 h-px bg-white/10"></div>
+          </div>
+
+          <div class="space-y-3">
+            <a href="/auth/google" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3" aria-label="Google로 로그인">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.602 32.91 29.21 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.156 7.951 3.049l5.657-5.657C34.676 6.249 29.627 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.651-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.818C14.655 16.116 18.961 12 24 12c3.059 0 5.842 1.156 7.951 3.049l5.657-5.657C34.676 6.249 29.627 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.136 0 9.793-1.962 13.294-5.164l-6.147-5.2C29.21 36 24 36 24 36c-5.186 0-9.562 3.058-11.265 7.407l-6.51-5.02C9.541 41.559 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.08 2.827-3.266 5.093-6.003 6.657l.003-.002 6.147 5.2C34.939 40.12 40 36 40 24c0-1.341-.138-2.651-.389-3.917z"/></svg>
+              <span class="text-sm font-medium">Google로 로그인</span>
+            </a>
+
+            <a href="/auth/github" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3" aria-label="GitHub로 로그인">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.84 3.14 8.94 7.49 10.39.55.1.75-.24.75-.53 0-.26-.01-1.12-.02-2.03-3.05.66-3.7-1.29-3.7-1.29-.5-1.27-1.22-1.61-1.22-1.61-.99-.68.07-.66.07-.66 1.1.08 1.68 1.14 1.68 1.14.98 1.68 2.57 1.2 3.2.92.1-.71.38-1.2.69-1.47-2.44-.28-5-1.22-5-5.44 0-1.2.43-2.18 1.14-2.95-.11-.28-.49-1.42.11-2.95 0 0 .92-.3 3.01 1.13.87-.24 1.8-.36 2.72-.36.92 0 1.85.12 2.72.36 2.09-1.43 3.01-1.13 3.01-1.13.6 1.53.22 2.67.11 2.95.71.77 1.14 1.75 1.14 2.95 0 4.23-2.57 5.16-5.01 5.43.39.34.74 1.01.74 2.05 0 1.48-.01 2.67-.01 3.03 0 .29.2.63.75.52 4.36-1.45 7.49-5.55 7.49-10.39C23.02 5.24 18.27.5 12 .5z"/></svg>
+              <span class="text-sm font-medium">GitHub로 로그인</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="mt-auto py-10 px-4 border-t border-dark-border bg-dark-card/30">
+    <div class="max-w-6xl mx-auto text-center">
+      <div class="text-2xl font-semibold tracking-tight text-slate-100 mb-4">SafeScan</div>
+      <div class="flex justify-center space-x-6 text-sm text-gray-500">
+        <a href="#" class="hover:text-primary transition-colors">서비스 소개</a>
+        <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
+        <a href="#" class="hover:text-primary transition-colors">이용약관</a>
+        <a href="#" class="hover:text-primary transition-colors">고객지원</a>
+      </div>
+      <p class="text-xs text-gray-600 mt-4">© 2024 SafeScan. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const navbar = document.getElementById('navbar');
+      if (window.scrollY > 50) navbar.classList.add('nav-blur');
+      else navbar.classList.remove('nav-blur');
+    });
+  </script>
+</body>
+</html>

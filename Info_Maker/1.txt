@@ -1,0 +1,137 @@
+======================================================================
+파일 전체 분석 시작: 1.xls
+======================================================================
+
+--- 1. oleid (파일 식별 및 위험 지표) ---
+  - ID: ftype
+    Name: File format
+    Value: Unknown file type
+    Description: 
+
+  - ID: container
+    Name: Container format
+    Value: Unknown Container
+    Description: Container type
+
+  - ID: encrypted
+    Name: Encrypted
+    Value: False
+    Description: The file is not encrypted
+
+  - ID: vba
+    Name: VBA Macros
+    Value: Yes
+    Description: This file contains VBA macros. No suspicious keyword was found. Use olevba and mraptor for more info.
+
+  - ID: xlm
+    Name: XLM Macros
+    Value: No
+    Description: This file does not contain Excel 4/XLM macros.
+
+  - ID: ext_rels
+    Name: External Relationships
+    Value: 0
+    Description: External relationships such as remote templates, remote OLE objects, etc
+
+  - ID: ObjectPool
+    Name: ObjectPool
+    Value: False
+    Description: Contains an ObjectPool stream, very likely to contain embedded OLE objects or files. Use oleobj to check it.
+
+  - ID: flash
+    Name: Flash objects
+    Value: 0
+    Description: Number of embedded Flash objects (SWF files) detected in OLE streams. Not 100% accurate, there may be false positives.
+
+
+--- 2. olemeta (메타데이터 요약) ---
+   (olefile 라이브러리를 사용하여 SummaryInformation을 직접 파싱합니다)
+  -> OLE 파일이 아니므로 메타데이터를 읽을 수 없습니다.
+
+--- 3. olevba (VBA 매크로 분석) ---
+  🚨 **매크로 탐지: VBA 코드가 파일에 존재합니다.**
+
+  [매크로 스트림 정보]
+  - OLE 파일명: 1.xls
+    스트림 경로: 
+    VBA 모듈명: 1.xls
+    코드 크기: 0 bytes
+
+  [매크로 코드 분석 결과]
+  -> 분석 결과 없음
+
+--- 4. oledir (OLE 디렉토리 구조) ---
+  [오류] oledir 실행 실패:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/oledir.py", line 269, in <module>
+    main()
+    ~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/oledir.py", line 179, in main
+    ole = olefile.OleFileIO(filename)
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1127, in __init__
+    self.open(filename, write_mode=write_mode)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1256, in open
+    self._raise_defect(DEFECT_FATAL, "not an OLE2 structured storage file", NotOleFileError)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1166, in _raise_defect
+    raise exception_type(message)
+olefile.olefile.NotOleFileError: not an OLE2 structured storage file
+
+
+--- 5. olemap (OLE 섹터 맵) ---
+  [오류] olemap 실행 실패:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/olemap.py", line 296, in <module>
+    main()
+    ~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/olemap.py", line 279, in main
+    ole = olefile.OleFileIO(filename)
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1127, in __init__
+    self.open(filename, write_mode=write_mode)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1256, in open
+    self._raise_defect(DEFECT_FATAL, "not an OLE2 structured storage file", NotOleFileError)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1166, in _raise_defect
+    raise exception_type(message)
+olefile.olefile.NotOleFileError: not an OLE2 structured storage file
+
+
+--- 6. oletimes (스트림 타임스탬프) ---
+  [오류] oletimes 실행 실패:
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/oletimes.py", line 157, in <module>
+    main()
+    ~~~~^^
+  File "/usr/local/lib/python3.13/dist-packages/oletools-0.60.3-py3.13.egg/oletools/oletimes.py", line 152, in main
+    ole = olefile.OleFileIO(filename)
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1127, in __init__
+    self.open(filename, write_mode=write_mode)
+    ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1256, in open
+    self._raise_defect(DEFECT_FATAL, "not an OLE2 structured storage file", NotOleFileError)
+    ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3/dist-packages/olefile/olefile.py", line 1166, in _raise_defect
+    raise exception_type(message)
+olefile.olefile.NotOleFileError: not an OLE2 structured storage file
+
+
+--- 7. oleobj (임베디드 OLE 객체) ---
+oleobj 0.60.1 - http://decalage.info/oletools
+THIS IS WORK IN PROGRESS - Check updates regularly!
+Please report any issue at https://github.com/decalage2/oletools/issues
+
+-------------------------------------------------------------------------------
+File: '1.xls'
+WARNING  open failed: 1.xls (or its data) is neither zip nor OLE
+
+======================================================================
+파일 분석 완료: 1.xls
+======================================================================
