@@ -7,11 +7,13 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.user_service import create_local_user, local_login
 from itsdangerous import URLSafeSerializer
- 
+from dotenv import load_dotenv
+import os
+
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
-
+github = os.environ.get("GITHUB")
+github_re = os.environ.get("GITHUB_REDIRECT_URL")
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
         return templates.TemplateResponse("login.html", {"request": request})
