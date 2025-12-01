@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, Depends, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
@@ -7,25 +8,14 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.user_service import create_local_user, local_login
 from itsdangerous import URLSafeSerializer
-<<<<<<< HEAD
-from dotenv import load_dotenv
-import os
-
-router = APIRouter()
-templates = Jinja2Templates(directory="templates")
-github = os.environ.get("GITHUB")
-github_re = os.environ.get("GITHUB_REDIRECT_URL")
-=======
-from app.config import SECRET_KEY  # ← 추가!
+from app.config import SECRET_KEY 
  
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-# SECRET_KEY를 config에서 가져오기
 serializer = URLSafeSerializer(SECRET_KEY)
 
 
->>>>>>> min
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
         return templates.TemplateResponse("login.html", {"request": request})
