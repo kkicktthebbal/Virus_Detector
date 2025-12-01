@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.user_service import create_local_user, local_login
 from itsdangerous import URLSafeSerializer
+<<<<<<< HEAD
 from dotenv import load_dotenv
 import os
 
@@ -14,6 +15,17 @@ router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 github = os.environ.get("GITHUB")
 github_re = os.environ.get("GITHUB_REDIRECT_URL")
+=======
+from app.config import SECRET_KEY  # ← 추가!
+ 
+router = APIRouter()
+templates = Jinja2Templates(directory="templates")
+
+# SECRET_KEY를 config에서 가져오기
+serializer = URLSafeSerializer(SECRET_KEY)
+
+
+>>>>>>> min
 @router.get("/login", response_class=HTMLResponse)
 def login_page(request: Request):
         return templates.TemplateResponse("login.html", {"request": request})
@@ -28,8 +40,6 @@ def pcreate_user(schema: LocalUserCreate, db : Session = Depends(get_db)):
     response = RedirectResponse(url="/", status_code=303)
     return response
 
-SECRET_KEY = "supersecret"
-serializer = URLSafeSerializer(SECRET_KEY)
 
 @router.post("/login")
 def loginProc(request: Request, user_id: str = Form(...), password: str = Form(...), db : Session = Depends(get_db)):

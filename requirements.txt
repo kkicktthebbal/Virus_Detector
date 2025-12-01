@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+python-multipart
+jinja2
+python-dotenv
+passlib[bcrypt]
+itsdangerous
+google-genai
+oletools
+olefile
+python-magic
