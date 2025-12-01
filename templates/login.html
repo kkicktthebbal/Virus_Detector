@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SafeScan</title>
+  <title>SafeScan - 로그인</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -21,10 +21,6 @@
   <style>
     body { box-sizing: border-box; }
     .nav-blur { backdrop-filter: blur(20px); background: rgba(18, 24, 33, 0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
-    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
-    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; }
-    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
     .input { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.1); }
     .input:focus { outline: none; border-color: #3BA3FF; box-shadow: 0 0 0 3px rgba(59,163,255,.2); }
     .btn { transition: .15s; }
@@ -40,19 +36,6 @@
       <div class="flex justify-between items-center h-16">
         <div class="flex-shrink-0">
           <a href="/" class="text-2xl font-semibold tracking-tight text-slate-100 hover:opacity-90 transition" aria-label="홈으로 이동">SafeScan</a>
-        </div>
-        <div class="hidden md:flex items-center space-x-1">
-          <a href="/scan/office-hwp" class="nav-link">MS Office/HWP</a>
-          <a href="/pdf" class="nav-link">PDF</a>
-          <a href="/archive" class="nav-link">임시</a>
-          <div class="w-px h-5 bg-white/10 mx-2"></div>
-          <a href="/login" class="nav-cta">로그인</a>
-          <a href="/signup" class="nav-cta">회원가입</a>
-        </div>
-        <div class="md:hidden">
-          <a href="/menu" class="p-2 rounded-lg hover:bg-white/5" aria-label="메뉴">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-          </a>
         </div>
       </div>
     </div>
@@ -95,6 +78,13 @@
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.84 3.14 8.94 7.49 10.39.55.1.75-.24.75-.53 0-.26-.01-1.12-.02-2.03-3.05.66-3.7-1.29-3.7-1.29-.5-1.27-1.22-1.61-1.22-1.61-.99-.68.07-.66.07-.66 1.1.08 1.68 1.14 1.68 1.14.98 1.68 2.57 1.2 3.2.92.1-.71.38-1.2.69-1.47-2.44-.28-5-1.22-5-5.44 0-1.2.43-2.18 1.14-2.95-.11-.28-.49-1.42.11-2.95 0 0 .92-.3 3.01 1.13.87-.24 1.8-.36 2.72-.36.92 0 1.85.12 2.72.36 2.09-1.43 3.01-1.13 3.01-1.13.6 1.53.22 2.67.11 2.95.71.77 1.14 1.75 1.14 2.95 0 4.23-2.57 5.16-5.01 5.43.39.34.74 1.01.74 2.05 0 1.48-.01 2.67-.01 3.03 0 .29.2.63.75.52 4.36-1.45 7.49-5.55 7.49-10.39C23.02 5.24 18.27.5 12 .5z"/></svg>
               <span class="text-sm font-medium">GitHub로 로그인</span>
             </a>
+          </div>
+
+          <div class="mt-6 text-center">
+            <p class="text-sm text-gray-400">
+              계정이 없으신가요? 
+              <a href="/signup" class="text-primary hover:text-secondary transition-colors font-medium">회원가입</a>
+            </p>
           </div>
         </div>
       </div>
