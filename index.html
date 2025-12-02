@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>악성 파일 탐지</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1 class="title">악성 파일 탐지</h1>
+
+  <div class="upload-box">
+    <label for="fileInput" class="file-btn">파일선택</label>
+    <input type="file" id="fileInput" hidden>
+    <span id="fileName">선택된 파일 없음</span>
+    <button id="scanBtn">검사 시작</button>
+  </div>
+
+  <div class="result-box">
+    <h2>LLM 요약</h2>
+    <textarea id="llmSummary" readonly></textarea>
+  </div>
+
+  <div class="result-box">
+    <h2>원본 분석 결과(JSON)</h2>
+    <textarea id="jsonResult" readonly></textarea>
+  </div>
+
+  <footer>Virus_Detector</footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
