@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ZIP 파일 스캔 - SafeScan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/config.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white">
+
+<nav class="fixed top-0 w-full z-50 backdrop-filter backdrop-blur-lg bg-dark-card/90 border-b border-dark-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="/index.html" class="text-2xl font-semibold text-slate-100">SafeScan</a>
+      <a href="/index.html" class="text-sm text-gray-300 hover:text-white">← 홈으로</a>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-24 pb-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-4 text-center">ZIP 파일 스캔</h1>
+    <p class="text-gray-400 text-center mb-12">압축 파일 구조 분석 및 Zip Bomb, 위험 파일 탐지</p>
+    
+    <!-- 업로드 폼 -->
+    <div class="bg-dark-card rounded-2xl p-8 border border-dark-border mb-8">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mb-6">
+          <label class="block text-sm font-medium mb-2">ZIP 파일 선택</label>
+          <input type="file" id="fileInput" name="file" accept=".zip" 
+                 class="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white
+                        file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                        file:bg-primary file:text-white file:cursor-pointer
+                        hover:file:bg-blue-600" required>
+        </div>
+        <button type="submit" id="scanBtn"
+                class="w-full py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">
+          스캔 시작
+        </button>
+      </form>
+    </div>
+
+    <!-- 로딩 -->
+    <div id="loading" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p class="text-gray-400">파일을 분석하고 있습니다...</p>
+    </div>
+
+    <!-- 결과 -->
+    <div id="result" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border">
+      <h2 class="text-2xl font-bold mb-6">스캔 결과</h2>
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fileInput = document.getElementById('fileInput');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+  const scanBtn = document.getElementById('scanBtn');
+  
+  if (!fileInput.files[0]) {
+    alert('파일을 선택해주세요');
+    return;
+  }
+  
+  // UI 업데이트
+  scanBtn.disabled = true;
+  scanBtn.textContent = '스캔 중...';
+  loading.classList.remove('hidden');
+  result.classList.add('hidden');
+  
+  // FormData 생성
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+  
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/scan/zip`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    // 결과 표시
+    displayResult(data);
+    
+  } catch (error) {
+    alert('스캔 중 오류가 발생했습니다: ' + error.message);
+  } finally {
+    loading.classList.add('hidden');
+    scanBtn.disabled = false;
+    scanBtn.textContent = '스캔 시작';
+  }
+});
+
+function displayResult(data) {
+  const resultContent = document.getElementById('resultContent');
+  const result = document.getElementById('result');
+  const analysis = data.analysis;
+  
+  if (analysis.error) {
+    resultContent.innerHTML = `
+      <div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+        <p class="text-red-400">❌ ${analysis.error}</p>
+      </div>
+    `;
+  } else {
+    const statusColor = analysis.status === 'clean' ? 'green' : 
+                       analysis.status === 'warning' ? 'yellow' : 'red';
+    const statusText = analysis.status === 'clean' ? '안전' : 
+                      analysis.status === 'warning' ? '주의' : '위험';
+    
+    // 파일 목록
+    let filesHtml = '';
+    if (analysis.files && analysis.files.length > 0) {
+      filesHtml = '<div class="mt-6"><h3 class="text-lg font-semibold mb-3">내부 파일 목록</h3><div class="space-y-2 max-h-96 overflow-y-auto">';
+      for (const file of analysis.files) {
+        const hasWarnings = file.warnings && file.warnings.length > 0;
+        const borderClass = hasWarnings ? 'border-red-500/50 bg-red-500/5' : 'border-dark-border';
+        
+        filesHtml += `
+          <div class="bg-dark-bg p-3 rounded-lg border ${borderClass}">
+            <div class="flex justify-between items-start mb-1">
+              <span class="font-mono text-sm break-all flex-1">${file.filename}</span>
+              <span class="text-xs text-gray-400 ml-2 whitespace-nowrap">압축률: ${file.compression_ratio}x</span>
+            </div>
+            ${hasWarnings ? `
+              <div class="flex flex-wrap gap-1 mt-2">
+                ${file.warnings.map(w => `
+                  <span class="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded">${w}</span>
+                `).join('')}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }
+      filesHtml += '</div></div>';
+    }
+    
+    resultContent.innerHTML = `
+      <div class="space-y-6">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm text-gray-400">파일명</p>
+            <p class="text-lg font-medium">${analysis.file_name}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-400">상태</p>
+            <span class="inline-block px-4 py-1 rounded-full text-sm font-medium
+                         bg-${statusColor}-500/20 text-${statusColor}-400 border border-${statusColor}-500/50">
+              ${statusText}
+            </span>
+          </div>
+        </div>
+        
+        <div class="bg-dark-bg p-4 rounded-lg">
+          <p class="text-sm text-gray-400 mb-1">위험도 점수</p>
+          <div class="flex items-center gap-3">
+            <div class="flex-1 bg-gray-700 rounded-full h-2">
+              <div class="bg-${statusColor}-500 h-2 rounded-full transition-all"
+                   style="width: ${Math.min(100, analysis.risk_score)}%"></div>
+            </div>
+            <span class="text-lg font-bold">${analysis.risk_score}</span>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-dark-bg p-4 rounded-lg">
+            <p class="text-sm text-gray-400">총 파일 개수</p>
+            <p class="text-2xl font-bold">${analysis.file_count}</p>
+          </div>
+          <div class="bg-dark-bg p-4 rounded-lg">
+            <p class="text-sm text-gray-400">파일 타입</p>
+            <p class="text-2xl font-bold">ZIP</p>
+          </div>
+        </div>
+        
+        ${filesHtml}
+        
+        <div class="bg-blue-500/10 border border-blue-500/50 rounded-lg p-4">
+          <p class="text-sm text-blue-300">
+            💡 <strong>분석 안내:</strong> 압축률이 100배 이상인 파일은 Zip Bomb 공격의 가능성이 있습니다. 
+            실행 파일(.exe, .bat 등)이나 암호화된 파일이 포함되어 있는 경우 주의가 필요합니다.
+          </p>
+        </div>
+      </div>
+    `;
+  }
+  
+  result.classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>

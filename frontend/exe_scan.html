@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>실행파일 스캔 - SafeScan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/config.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white">
+
+<nav class="fixed top-0 w-full z-50 backdrop-filter backdrop-blur-lg bg-dark-card/90 border-b border-dark-border">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="/index.html" class="text-2xl font-semibold text-slate-100">SafeScan</a>
+      <a href="/index.html" class="text-sm text-gray-300 hover:text-white">← 홈으로</a>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-24 pb-16 px-4">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl font-bold mb-4 text-center">실행파일 스캔</h1>
+    <p class="text-gray-400 text-center mb-12">EXE, DLL 파일의 정적 분석을 통한 악성 행위 패턴 탐지</p>
+    
+    <!-- 업로드 폼 -->
+    <div class="bg-dark-card rounded-2xl p-8 border border-dark-border mb-8">
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="mb-6">
+          <label class="block text-sm font-medium mb-2">실행 파일 선택</label>
+          <input type="file" id="fileInput" name="file" accept=".exe,.dll,.sys" 
+                 class="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white
+                        file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                        file:bg-secondary file:text-white file:cursor-pointer
+                        hover:file:bg-cyan-400" required>
+        </div>
+        <button type="submit" id="scanBtn"
+                class="w-full py-3 bg-secondary hover:bg-cyan-400 rounded-xl font-medium transition-all">
+          스캔 시작
+        </button>
+      </form>
+    </div>
+
+    <!-- 로딩 -->
+    <div id="loading" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border text-center">
+      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-secondary mx-auto mb-4"></div>
+      <p class="text-gray-400">파일을 분석하고 있습니다...</p>
+    </div>
+
+    <!-- 결과 -->
+    <div id="result" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border">
+      <h2 class="text-2xl font-bold mb-6">스캔 결과</h2>
+      <div id="resultContent"></div>
+    </div>
+  </div>
+</main>
+
+<script>
+document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const fileInput = document.getElementById('fileInput');
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+  const scanBtn = document.getElementById('scanBtn');
+  
+  if (!fileInput.files[0]) {
+    alert('파일을 선택해주세요');
+    return;
+  }
+  
+  // UI 업데이트
+  scanBtn.disabled = true;
+  scanBtn.textContent = '스캔 중...';
+  loading.classList.remove('hidden');
+  result.classList.add('hidden');
+  
+  // FormData 생성
+  const formData = new FormData();
+  formData.append('file', fileInput.files[0]);
+  
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/scan/executable`, {
+      method: 'POST',
+      body: formData
+    });
+    
+    const data = await response.json();
+    
+    // 결과 표시
+    displayResult(data);
+    
+  } catch (error) {
+    alert('스캔 중 오류가 발생했습니다: ' + error.message);
+  } finally {
+    loading.classList.add('hidden');
+    scanBtn.disabled = false;
+    scanBtn.textContent = '스캔 시작';
+  }
+});
+
+function displayResult(data) {
+  const resultContent = document.getElementById('resultContent');
+  const result = document.getElementById('result');
+  const analysis = data.analysis;
+  
+  if (analysis.error) {
+    resultContent.innerHTML = `
+      <div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4">
+        <p class="text-red-400">❌ ${analysis.error}</p>
+      </div>
+    `;
+  } else {
+    const statusColor = analysis.status === 'clean' ? 'green' : 
+                       analysis.status === 'warning' ? 'yellow' : 'red';
+    const statusText = analysis.status === 'clean' ? '안전' : 
+                      analysis.status === 'warning' ? '주의' : '위험';
+    
+    // 헤더 정보
+    let headerHtml = '';
+    if (analysis.header_info) {
+      headerHtml = `
+        <div class="mt-6">
+          <h3 class="text-lg font-semibold mb-3">헤더 정보</h3>
+          <div class="bg-dark-bg p-4 rounded-lg space-y-2 font-mono text-sm">
+            <div class="flex justify-between"><span class="text-gray-400">Entry Point:</span><span>${analysis.header_info.entry_point}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">Image Base:</span><span>${analysis.header_info.image_base}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">섹션 개수:</span><span>${analysis.header_info.section_count}</span></div>
+            <div class="flex justify-between"><span class="text-gray-400">컴파일 시간:</span><span>${analysis.header_info.compile_time}</span></div>
+          </div>
+        </div>
+      `;
+    }
+    
+    // 섹션 정보
+    let sectionsHtml = '';
+    if (analysis.sections && analysis.sections.length > 0) {
+      sectionsHtml = '<div class="mt-6"><h3 class="text-lg font-semibold mb-3">섹션 분석 (패킹 탐지)</h3><div class="space-y-2">';
+      for (const section of analysis.sections) {
+        const packedClass = section.is_packed ? 'border-red-500/50 bg-red-500/10' : 'border-dark-border';
+        sectionsHtml += `
+          <div class="bg-dark-bg p-3 rounded-lg border ${packedClass}">
+            <div class="flex justify-between items-center mb-2">
+              <span class="font-mono font-bold">${section.name || '(unnamed)'}</span>
+              ${section.is_packed ? '<span class="text-xs px-2 py-1 bg-red-500/20 text-red-400 rounded">패킹 의심</span>' : ''}
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div><span class="text-gray-400">크기:</span> ${section.raw_size} bytes</div>
+              <div><span class="text-gray-400">엔트로피:</span> ${section.entropy}</div>
+            </div>
+            ${section.warning ? `<p class="text-xs text-yellow-400 mt-2">⚠️ ${section.warning}</p>` : ''}
+          </div>
+        `;
+      }
+      sectionsHtml += '</div></div>';
+    }
+    
+    // 의심 API
+    let apisHtml = '';
+    if (analysis.suspicious_apis && analysis.suspicious_apis.length > 0) {
+      apisHtml = '<div class="mt-6"><h3 class="text-lg font-semibold mb-3">의심스러운 API 호출</h3><div class="space-y-2">';
+      for (const api of analysis.suspicious_apis) {
+        apisHtml += `
+          <div class="bg-dark-bg p-3 rounded-lg border border-yellow-500/50">
+            <div class="font-mono text-yellow-400">${api.function}</div>
+            <div class="text-sm text-gray-400 mt-1">라이브러리: ${api.library}</div>
+          </div>
+        `;
+      }
+      apisHtml += '</div></div>';
+    }
+    
+    resultContent.innerHTML = `
+      <div class="space-y-6">
+        <div class="flex justify-between items-center">
+          <div>
+            <p class="text-sm text-gray-400">파일명</p>
+            <p class="text-lg font-medium">${analysis.file_name}</p>
+          </div>
+          <div class="text-right">
+            <p class="text-sm text-gray-400">상태</p>
+            <span class="inline-block px-4 py-1 rounded-full text-sm font-medium
+                         bg-${statusColor}-500/20 text-${statusColor}-400 border border-${statusColor}-500/50">
+              ${statusText}
+            </span>
+          </div>
+        </div>
+        
+        <div class="bg-dark-bg p-4 rounded-lg">
+          <p class="text-sm text-gray-400 mb-1">위험도 점수</p>
+          <div class="flex items-center gap-3">
+            <div class="flex-1 bg-gray-700 rounded-full h-2">
+              <div class="bg-${statusColor}-500 h-2 rounded-full transition-all"
+                   style="width: ${Math.min(100, analysis.risk_score)}%"></div>
+            </div>
+            <span class="text-lg font-bold">${analysis.risk_score}</span>
+          </div>
+        </div>
+        
+        ${analysis.warning ? `
+          <div class="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4">
+            <p class="text-yellow-300">⚠️ ${analysis.warning}</p>
+          </div>
+        ` : ''}
+        
+        ${headerHtml}
+        ${sectionsHtml}
+        ${apisHtml}
+      </div>
+    `;
+  }
+  
+  result.classList.remove('hidden');
+}
+</script>
+
+</body>
+</html>

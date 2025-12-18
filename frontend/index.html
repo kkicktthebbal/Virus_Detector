@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SafeScan - 파일 악성코드 분석</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/config.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: { bg: '#0B0F12', card: '#121821', border: 'rgba(255, 255, 255, 0.1)' },
+            primary: '#3BA3FF',
+            secondary: '#22D3EE'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { box-sizing: border-box; }
+    .nav-blur { backdrop-filter: blur(20px); background: rgba(18, 24, 33, 0.9); border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; cursor: pointer; }
+    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
+    .risk-high { color:#EF4444; background:rgba(239,68,68,.1); }
+    .risk-med  { color:#F59E0B; background:rgba(245,158,11,.1); }
+    .risk-low  { color:#6B7280; background:rgba(107,114,128,.1); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white font-sans">
+
+<nav id="navbar" class="fixed top-0 w-full z-50 transition-all duration-300">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <a href="/index.html" class="text-2xl font-semibold text-slate-100">SafeScan</a>
+
+      <!-- 로그인 상태 네비게이션 -->
+      <div id="nav-authenticated" class="hidden md:flex items-center space-x-1">
+        <a href="/ms3.html" class="nav-link">MS Office/HWP</a>
+        <a href="/pdf_scan.html" class="nav-link">PDF</a>
+        <a href="/exe_scan.html" class="nav-link">실행파일</a>
+        <a href="/zip_scan.html" class="nav-link">ZIP</a>
+        <div class="w-px h-5 bg-white/10 mx-4"></div>
+        <span id="user-name" class="text-sm text-gray-200 pl-1 pr-2"></span>
+        <button id="logout-btn" class="nav-cta">로그아웃</button>
+      </div>
+
+      <!-- 비로그인 상태 네비게이션 -->
+      <div id="nav-guest" class="hidden md:flex items-center space-x-1">
+        <a href="/login.html" class="nav-cta">로그인</a>
+        <a href="/signup.html" class="nav-cta">회원가입</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<main class="pt-16">
+  <section class="py-20 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+        누구나 쉽게,<br> 전문가처럼 검사하세요.
+      </h1>
+      <p class="text-xl md:text-2xl text-gray-300">PDF · MS Office/HWP · 실행파일 · ZIP 정적 분석, 근거까지 투명하게.</p>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-dark-card/30">
+    <div class="max-w-6xl mx-auto">
+      <h2 class="text-3xl font-bold text-center mb-12">스캔 타입별 분석</h2>
+      <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-primary/50 transition-all group">
+          <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-all">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">MS Office/HWP</h3>
+          <p class="text-sm text-gray-400 mb-4">매크로 및 악성 스크립트 탐지</p>
+          <a href="/ms3.html" class="w-full inline-block text-center py-2 bg-primary hover:bg-blue-600 rounded-lg text-sm font-medium transition-all">스캔하기</a>
+        </div>
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-primary/50 transition-all group">
+          <div class="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-primary/30 transition-all">
+            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">PDF</h3>
+          <p class="text-sm text-gray-400 mb-4">JavaScript 및 자동실행 탐지</p>
+          <a href="/pdf_scan.html" class="w-full inline-block text-center py-2 bg-primary hover:bg-blue-600 rounded-lg text-sm font-medium transition-all">스캔하기</a>
+        </div>
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-secondary/50 transition-all group">
+          <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-secondary/30 transition-all">
+            <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">실행파일</h3>
+          <p class="text-sm text-gray-400 mb-4">EXE/DLL 악성 행위 패턴 탐지</p>
+          <a href="/exe_scan.html" class="w-full inline-block text-center py-2 bg-secondary hover:bg-cyan-400 rounded-lg text-sm font-medium transition-all">스캔하기</a>
+        </div>
+        <div class="bg-dark-card rounded-2xl p-6 border border-dark-border hover:border-secondary/50 transition-all group">
+          <div class="w-12 h-12 bg-secondary/20 rounded-xl flex items-center justify-center mb-4 group-hover:bg-secondary/30 transition-all">
+            <svg class="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          </div>
+          <h3 class="text-lg font-semibold mb-2">ZIP</h3>
+          <p class="text-sm text-gray-400 mb-4">Zip Bomb 및 위험 파일 탐지</p>
+          <a href="/zip_scan.html" class="w-full inline-block text-center py-2 bg-secondary hover:bg-cyan-400 rounded-lg text-sm font-medium transition-all">스캔하기</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="py-12 px-4 border-t border-dark-border">
+  <div class="max-w-6xl mx-auto text-center">
+    <div class="text-2xl font-semibold tracking-tight text-slate-100 mb-4">SafeScan</div>
+    <div class="flex justify-center space-x-6 text-sm text-gray-500">
+      <a href="#" class="hover:text-primary transition-colors">서비스 소개</a>
+      <a href="#" class="hover:text-primary transition-colors">개인정보처리방침</a>
+      <a href="#" class="hover:text-primary transition-colors">이용약관</a>
+      <a href="#" class="hover:text-primary transition-colors">고객지원</a>
+    </div>
+    <p class="text-xs text-gray-600 mt-4">© 2024 SafeScan. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+// 사용자 인증 상태 확인
+async function checkAuth() {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/me`, {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.authenticated) {
+        document.getElementById('nav-authenticated').classList.remove('hidden');
+        document.getElementById('nav-guest').classList.add('hidden');
+        document.getElementById('user-name').textContent = data.name + '님';
+        return;
+      }
+    }
+  } catch (error) {
+    console.error('Auth check failed:', error);
+  }
+  
+  // 비로그인 상태
+  document.getElementById('nav-authenticated').classList.add('hidden');
+  document.getElementById('nav-guest').classList.remove('hidden');
+}
+
+// 로그아웃 처리
+document.getElementById('logout-btn')?.addEventListener('click', async () => {
+  try {
+    await fetch(`${CONFIG.API_BASE_URL}/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.reload();
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+});
+
+// 스크롤 시 네비게이션 블러 효과
+window.addEventListener('scroll', () => {
+  const navbar = document.getElementById('navbar');
+  if (window.scrollY > 50) navbar.classList.add('nav-blur');
+  else navbar.classList.remove('nav-blur');
+});
+
+// 페이지 로드 시 인증 상태 확인
+checkAuth();
+</script>
+</body>
+</html>

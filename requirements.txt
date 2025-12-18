@@ -10,3 +10,4 @@ google-genai
 oletools
 olefile
 python-magic
+pefile
