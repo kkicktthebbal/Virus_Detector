@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import scan_router, user_router, oauth_router
+from app.backend.router import scan_router, user_router, oauth_router
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.models.user import User
+from app.backend.model.user import User
 import os
 
 app = FastAPI(

@@ -8,10 +8,10 @@ from fastapi.requests import Request
 from fastapi.responses import HTMLResponse, JSONResponse
 
 # 통합 파일 분석 모듈 import
-from backend.analyze.file_analyzer import analyze_file
+from app.backend.analyze.file_analyzer import analyze_file
 
 # Gemini 분석 함수들 import
-from backend.LLM.gemini import (
+from app.backend.LLM.gemini import (
     generate_pdf_summary,
     generate_pe_summary,
     generate_zip_summary,

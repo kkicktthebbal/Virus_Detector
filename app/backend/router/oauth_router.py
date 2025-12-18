@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from backend.service.user_service import create_or_get_social_user
-from backend.schema.user_schema import SocialUserCreate
+from app.backend.service.user_service import create_or_get_social_user
+from app.backend.schema.user_schema import SocialUserCreate
 from itsdangerous import URLSafeSerializer
 import httpx
 import secrets

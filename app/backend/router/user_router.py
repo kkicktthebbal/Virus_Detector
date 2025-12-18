@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, Response, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
-from backend.schema.user_schema import LocalUserCreate
+from app.backend.schema.user_schema import LocalUserCreate
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from backend.service.user_service import create_local_user, local_login
+from app.backend.service.user_service import create_local_user, local_login
 from itsdangerous import URLSafeSerializer
 from app.config import SECRET_KEY 
  
