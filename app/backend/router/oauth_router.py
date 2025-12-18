@@ -13,13 +13,13 @@ from app.config import (
     SECRET_KEY
 )
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/api/auth")
 serializer = URLSafeSerializer(SECRET_KEY)
 
 oauth_states = {}
 
 
-@router.get("/api/google")
+@router.get("/google")
 async def google_login():
     state = secrets.token_urlsafe(32)
     oauth_states[state] = True

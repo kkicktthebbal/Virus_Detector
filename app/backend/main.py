@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.backend.model.user import User
 import os
+from app.core.database import Base, engine
 
 app = FastAPI(
     title="SafeScan API",
@@ -122,3 +123,7 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     print("SafeScan API Server Shutdown")
+    
+@app.on_event("startup")
+def on_startup():
+    Base.metadata.create_all(bind=engine)
