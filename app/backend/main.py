@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from backend.router import scan_router, user_router, oauth_router
+from app.routers import scan_router, user_router, oauth_router
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from backend.model.user import User
+from app.models.user import User
 import os
 
 app = FastAPI(
@@ -44,14 +44,23 @@ app.add_middleware(
 
 @app.get("/health")
 def health_check():
-    """Internal ALB Health Check 엔드포인트"""
+    """Internal ALB Health Check 엔드포인트 (기존 호환성)"""
     return {
         "status": "healthy",
         "service": "safescan-api",
         "version": "1.0.0"
     }
 
-@app.get("/health/deep")
+@app.get("/api/health")
+def api_health_check():
+    """API Health Check 엔드포인트"""
+    return {
+        "status": "healthy",
+        "service": "safescan-api",
+        "version": "1.0.0"
+    }
+
+@app.get("/api/health/deep")
 def deep_health_check(db: Session = Depends(get_db)):
     """데이터베이스 연결 확인"""
     try:
@@ -71,32 +80,6 @@ def deep_health_check(db: Session = Depends(get_db)):
         )
 
 # ==========================================
-# 사용자 인증 API
-# ==========================================
-
-@app.get("/api/me")
-def get_current_user(request: Request, db: Session = Depends(get_db)):
-    """현재 로그인한 사용자 정보 반환 (프론트엔드용)"""
-    cookie = request.cookies.get("session")
-    if not cookie:
-        return {"authenticated": False}
-    
-    try:
-        user_id = oauth_router.serializer.loads(cookie)
-        user = db.query(User).filter(User.user_id == user_id).first()
-        if user:
-            return {
-                "authenticated": True,
-                "user_id": user.user_id,
-                "name": user.name,
-                "email": user.email
-            }
-    except Exception as e:
-        pass
-    
-    return {"authenticated": False}
-
-# ==========================================
 # 루트 엔드포인트
 # ==========================================
 
@@ -109,12 +92,17 @@ def root():
         "status": "running",
         "frontend": "https://d2atpnajyyx47s.cloudfront.net",
         "endpoints": {
-            "health": "/health",
+            "health": "/api/health",
             "api_me": "/api/me",
-            "scan_pdf": "/scan/pdf",
-            "scan_exe": "/scan/executable",
-            "scan_zip": "/scan/zip",
-            "scan_ms": "/scan/ms"
+            "scan_pdf": "/api/scan/pdf",
+            "scan_exe": "/api/scan/executable",
+            "scan_zip": "/api/scan/zip",
+            "scan_ms": "/api/scan/ms",
+            "auth_google": "/api/auth/google",
+            "auth_github": "/api/auth/github",
+            "login": "/api/login",
+            "logout": "/api/logout",
+            "signup": "/api/signup_user"
         }
     }
 
@@ -128,6 +116,7 @@ async def startup_event():
     print("=" * 70)
     print("SafeScan API Server Started")
     print(f"CORS Origins: {origins}")
+    print("All API endpoints now use /api prefix")
     print("=" * 70)
 
 @app.on_event("shutdown")

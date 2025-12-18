@@ -152,7 +152,7 @@ async function checkAuth() {
 // 로그아웃 처리
 document.getElementById('logout-btn')?.addEventListener('click', async () => {
   try {
-    await fetch(`${CONFIG.API_BASE_URL}/logout`, {
+    await fetch(`${CONFIG.API_BASE_URL}/api/logout`, {
       method: 'POST',
       credentials: 'include'
     });

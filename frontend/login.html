@@ -57,12 +57,12 @@
           </div>
 
           <div class="space-y-3">
-            <a href="/auth/google" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3">
+            <a href="/api/auth/google" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303C33.602 32.91 29.21 36 24 36c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.156 7.951 3.049l5.657-5.657C34.676 6.249 29.627 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.651-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.818C14.655 16.116 18.961 12 24 12c3.059 0 5.842 1.156 7.951 3.049l5.657-5.657C34.676 6.249 29.627 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.136 0 9.793-1.962 13.294-5.164l-6.147-5.2C29.21 36 24 36 24 36c-5.186 0-9.562 3.058-11.265 7.407l-6.51-5.02C9.541 41.559 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-1.08 2.827-3.266 5.093-6.003 6.657l.003-.002 6.147 5.2C34.939 40.12 40 36 40 24c0-1.341-.138-2.651-.389-3.917z"/></svg>
               <span class="text-sm font-medium">Google로 로그인</span>
             </a>
 
-            <a href="/auth/github" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3">
+            <a href="/api/auth/github" class="btn btn-outline w-full rounded-xl py-3 flex items-center justify-center gap-3">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.73.5.98 5.24.98 11.5c0 4.84 3.14 8.94 7.49 10.39.55.1.75-.24.75-.53 0-.26-.01-1.12-.02-2.03-3.05.66-3.7-1.29-3.7-1.29-.5-1.27-1.22-1.61-1.22-1.61-.99-.68.07-.66.07-.66 1.1.08 1.68 1.14 1.68 1.14.98 1.68 2.57 1.2 3.2.92.1-.71.38-1.2.69-1.47-2.44-.28-5-1.22-5-5.44 0-1.2.43-2.18 1.14-2.95-.11-.28-.49-1.42.11-2.95 0 0 .92-.3 3.01 1.13.87-.24 1.8-.36 2.72-.36.92 0 1.85.12 2.72.36 2.09-1.43 3.01-1.13 3.01-1.13.6 1.53.22 2.67.11 2.95.71.77 1.14 1.75 1.14 2.95 0 4.23-2.57 5.16-5.01 5.43.39.34.74 1.01.74 2.05 0 1.48-.01 2.67-.01 3.03 0 .29.2.63.75.52 4.36-1.45 7.49-5.55 7.49-10.39C23.02 5.24 18.27.5 12 .5z"/></svg>
               <span class="text-sm font-medium">GitHub로 로그인</span>
             </a>
@@ -98,7 +98,7 @@
       const formData = new FormData(e.target);
       
       try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/api/login`, {
           method: 'POST',
           body: formData,
           credentials: 'include'

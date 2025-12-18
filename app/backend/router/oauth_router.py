@@ -19,7 +19,7 @@ serializer = URLSafeSerializer(SECRET_KEY)
 oauth_states = {}
 
 
-@router.get("/google")
+@router.get("/api/google")
 async def google_login():
     state = secrets.token_urlsafe(32)
     oauth_states[state] = True

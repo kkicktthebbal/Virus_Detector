@@ -19,7 +19,7 @@ from backend.LLM.gemini import (
 )
 
 router = APIRouter(
-    prefix="/scan"
+    prefix="/api/scan"
 )
 
 templates = Jinja2Templates(directory="templates")

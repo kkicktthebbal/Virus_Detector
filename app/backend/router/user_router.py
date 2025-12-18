@@ -9,7 +9,9 @@ from backend.service.user_service import create_local_user, local_login
 from itsdangerous import URLSafeSerializer
 from app.config import SECRET_KEY 
  
-router = APIRouter()
+router = APIRouter(
+     prefix="/api"
+)
 templates = Jinja2Templates(directory="templates")
 
 serializer = URLSafeSerializer(SECRET_KEY)
