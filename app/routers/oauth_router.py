@@ -13,7 +13,7 @@ from app.config import (
     SECRET_KEY
 )
 
-router = APIRouter(prefix="/auth")
+router = APIRouter(prefix="/api/auth")
 serializer = URLSafeSerializer(SECRET_KEY)
 
 oauth_states = {}

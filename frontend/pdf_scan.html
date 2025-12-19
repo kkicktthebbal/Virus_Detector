@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PDF ìŠ¤ìº” - SafeScan</title>
+  <title>PDF ½ºÄµ - SafeScan</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="/config.js"></script>
   <script>
@@ -19,6 +19,32 @@
       }
     }
   </script>
+  <style>
+    .nav-link { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; color: #d1d5db; transition: .15s; }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,.05); }
+    .nav-cta { padding: .5rem .75rem; border-radius: .5rem; font-size: .875rem; font-weight: 600; color: #3BA3FF; transition: .15s; cursor: pointer; }
+    .nav-cta:hover { color: #fff; background: rgba(59,163,255,.2); }
+    .hidden { display: none !important; }
+    
+    /* µå·¡±×¾Øµå·Ó ½ºÅ¸ÀÏ */
+    .dropzone {
+      border: 2px dashed rgba(59, 163, 255, 0.3);
+      background: rgba(59, 163, 255, 0.05);
+      transition: all 0.3s;
+    }
+    .dropzone.dragover {
+      border-color: #3BA3FF;
+      background: rgba(59, 163, 255, 0.15);
+      transform: scale(1.02);
+    }
+    .file-preview {
+      animation: slideIn 0.3s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body class="h-full bg-gradient-to-br from-dark-bg to-slate-900 text-white">
 
@@ -26,60 +52,191 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex justify-between items-center h-16">
       <a href="/index.html" class="text-2xl font-semibold text-slate-100">SafeScan</a>
-      <a href="/index.html" class="text-sm text-gray-300 hover:text-white">â† í™ˆìœ¼ë¡œ</a>
+      
+      <div class="flex items-center space-x-4">
+        <span id="user-name" class="text-sm text-gray-300"></span>
+        <button id="logout-btn" class="nav-cta hidden">·Î±×¾Æ¿ô</button>
+        <a href="/index.html" class="text-sm text-gray-300 hover:text-white">¡ç È¨À¸·Î</a>
+      </div>
     </div>
   </div>
 </nav>
 
 <main class="pt-24 pb-16 px-4">
   <div class="max-w-4xl mx-auto">
-    <h1 class="text-4xl font-bold mb-4 text-center">PDF íŒŒì¼ ìŠ¤ìº”</h1>
-    <p class="text-gray-400 text-center mb-12">PDF ë¬¸ì„œì˜ ì•…ì„± í‚¤ì›Œë“œì™€ ìœ„í—˜ ìš”ì†Œë¥¼ ë¶„ì„í•©ë‹ˆë‹¤</p>
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold mb-4">PDF ÆÄÀÏ ½ºÄµ</h1>
+      <p class="text-gray-400">PDF ¹®¼­ÀÇ ¾Ç¼º Å°¿öµå¿Í À§Çè ¿ä¼Ò¸¦ AI°¡ ºĞ¼®ÇÕ´Ï´Ù</p>
+    </div>
     
     <div class="bg-dark-card rounded-2xl p-8 border border-dark-border mb-8">
-      <form id="uploadForm" enctype="multipart/form-data">
-        <div class="mb-6">
-          <label class="block text-sm font-medium mb-2">PDF íŒŒì¼ ì„ íƒ</label>
-          <input type="file" id="fileInput" name="file" accept=".pdf" 
-                 class="w-full px-4 py-3 bg-dark-bg border border-dark-border rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary file:text-white file:cursor-pointer hover:file:bg-blue-600" required>
+      <div id="dropzone" class="dropzone rounded-xl p-12 text-center cursor-pointer">
+        <svg class="w-16 h-16 mx-auto mb-4 text-primary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+        </svg>
+        <p class="text-lg mb-2">ÆÄÀÏÀ» µå·¡±×ÇÏ°Å³ª Å¬¸¯ÇÏ¿© ¾÷·Îµå</p>
+        <p class="text-sm text-gray-500">PDF ÆÄÀÏ¸¸ °¡´É (ÃÖ´ë 50MB)</p>
+        <input type="file" id="fileInput" name="file" accept=".pdf" class="hidden" />
+      </div>
+      
+      <div id="filePreview" class="hidden file-preview mt-6 p-4 bg-dark-bg rounded-lg">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <svg class="w-10 h-10 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+            </svg>
+            <div>
+              <p id="fileName" class="font-medium"></p>
+              <p id="fileSize" class="text-sm text-gray-500"></p>
+            </div>
+          </div>
+          <button id="removeFile" class="text-red-400 hover:text-red-300">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
         </div>
-        <button type="submit" id="scanBtn" class="w-full py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">ìŠ¤ìº” ì‹œì‘</button>
-      </form>
+      </div>
+      
+      <button id="scanBtn" class="hidden w-full mt-6 py-3 bg-primary hover:bg-blue-600 rounded-xl font-medium transition-all">
+        ½ºÄµ ½ÃÀÛ
+      </button>
     </div>
 
     <div id="loading" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border text-center">
       <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-      <p class="text-gray-400">íŒŒì¼ì„ ë¶„ì„í•˜ê³  ìˆìŠµë‹ˆë‹¤...</p>
+      <p class="text-gray-400">AI°¡ ÆÄÀÏÀ» ºĞ¼®ÇÏ°í ÀÖ½À´Ï´Ù...</p>
+      <p class="text-sm text-gray-500 mt-2">º¸Åë 10~30ÃÊ ¼Ò¿äµË´Ï´Ù</p>
     </div>
 
     <div id="result" class="hidden bg-dark-card rounded-2xl p-8 border border-dark-border">
-      <h2 class="text-2xl font-bold mb-6">ìŠ¤ìº” ê²°ê³¼</h2>
+      <h2 class="text-2xl font-bold mb-6">½ºÄµ °á°ú</h2>
       <div id="resultContent"></div>
     </div>
   </div>
 </main>
 
 <script>
-document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+// ÀÎÁõ Ã¼Å©
+async function checkAuth() {
+  try {
+    const response = await fetch(`${CONFIG.API_BASE_URL}/api/me`, {
+      credentials: 'include'
+    });
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.authenticated) {
+        document.getElementById('user-name').textContent = data.name + '´Ô';
+        document.getElementById('logout-btn').classList.remove('hidden');
+        return true;
+      }
+    }
+  } catch (error) {
+    console.error('Auth check failed:', error);
+  }
+  
+  // ºñ·Î±×ÀÎ ½Ã ·Î±×ÀÎ ÆäÀÌÁö·Î ¸®´ÙÀÌ·ºÆ®
+  alert('·Î±×ÀÎÀÌ ÇÊ¿äÇÑ ¼­ºñ½ºÀÔ´Ï´Ù.');
+  window.location.href = '/login.html';
+  return false;
+}
+
+// ·Î±×¾Æ¿ô
+document.getElementById('logout-btn')?.addEventListener('click', async () => {
+  try {
+    await fetch(`${CONFIG.API_BASE_URL}/api/logout`, {
+      method: 'POST',
+      credentials: 'include'
+    });
+    window.location.href = '/login.html';
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+});
+
+// µå·¡±×¾Øµå·Ó ±â´É
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const filePreview = document.getElementById('filePreview');
+const scanBtn = document.getElementById('scanBtn');
+let selectedFile = null;
+
+// µå·ÓÁ¸ Å¬¸¯
+dropzone.addEventListener('click', () => {
+  fileInput.click();
+});
+
+// ÆÄÀÏ ¼±ÅÃ
+fileInput.addEventListener('change', (e) => {
+  handleFile(e.target.files[0]);
+});
+
+// µå·¡±× ¿À¹ö
+dropzone.addEventListener('dragover', (e) => {
   e.preventDefault();
+  dropzone.classList.add('dragover');
+});
+
+dropzone.addEventListener('dragleave', () => {
+  dropzone.classList.remove('dragover');
+});
+
+// µå·Ó
+dropzone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dropzone.classList.remove('dragover');
+  handleFile(e.dataTransfer.files[0]);
+});
+
+// ÆÄÀÏ Ã³¸®
+function handleFile(file) {
+  if (!file) return;
   
-  const fileInput = document.getElementById('fileInput');
-  const loading = document.getElementById('loading');
-  const result = document.getElementById('result');
-  const scanBtn = document.getElementById('scanBtn');
-  
-  if (!fileInput.files[0]) {
-    alert('íŒŒì¼ì„ ì„ íƒí•´ì£¼ì„¸ìš”');
+  if (!file.name.endsWith('.pdf')) {
+    alert('PDF ÆÄÀÏ¸¸ ¾÷·Îµå °¡´ÉÇÕ´Ï´Ù.');
     return;
   }
   
+  if (file.size > 50 * 1024 * 1024) {
+    alert('ÆÄÀÏ Å©±â´Â 50MB ÀÌÇÏ¿©¾ß ÇÕ´Ï´Ù.');
+    return;
+  }
+  
+  selectedFile = file;
+  
+  // ÆÄÀÏ Á¤º¸ Ç¥½Ã
+  document.getElementById('fileName').textContent = file.name;
+  document.getElementById('fileSize').textContent = formatFileSize(file.size);
+  
+  dropzone.classList.add('hidden');
+  filePreview.classList.remove('hidden');
+  scanBtn.classList.remove('hidden');
+}
+
+// ÆÄÀÏ Á¦°Å
+document.getElementById('removeFile').addEventListener('click', () => {
+  selectedFile = null;
+  fileInput.value = '';
+  dropzone.classList.remove('hidden');
+  filePreview.classList.add('hidden');
+  scanBtn.classList.add('hidden');
+});
+
+// ½ºÄµ ½ÃÀÛ
+scanBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  
+  const loading = document.getElementById('loading');
+  const result = document.getElementById('result');
+  
   scanBtn.disabled = true;
-  scanBtn.textContent = 'ìŠ¤ìº” ì¤‘...';
+  scanBtn.textContent = '½ºÄµ Áß...';
   loading.classList.remove('hidden');
   result.classList.add('hidden');
   
   const formData = new FormData();
-  formData.append('file', fileInput.files[0]);
+  formData.append('file', selectedFile);
   
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL}/api/scan/pdf`, {
@@ -92,13 +249,19 @@ document.getElementById('uploadForm').addEventListener('submit', async (e) => {
     displayResult(data);
     
   } catch (error) {
-    alert('ìŠ¤ìº” ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆìŠµë‹ˆë‹¤: ' + error.message);
+    alert('½ºÄµ Áß ¿À·ù°¡ ¹ß»ıÇß½À´Ï´Ù: ' + error.message);
   } finally {
     loading.classList.add('hidden');
     scanBtn.disabled = false;
-    scanBtn.textContent = 'ìŠ¤ìº” ì‹œì‘';
+    scanBtn.textContent = '½ºÄµ ½ÃÀÛ';
   }
 });
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+}
 
 function displayResult(data) {
   const resultContent = document.getElementById('resultContent');
@@ -106,7 +269,7 @@ function displayResult(data) {
   const analysis = data.analysis;
   
   if (analysis.error) {
-    resultContent.innerHTML = `<div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4"><p class="text-red-400">âŒ ${analysis.error}</p></div>`;
+    resultContent.innerHTML = `<div class="bg-red-500/10 border border-red-500/50 rounded-lg p-4"><p class="text-red-400">? ${analysis.error}</p></div>`;
   } else {
     let llmData = null;
     if (data.llm_summary) {
@@ -124,24 +287,24 @@ function displayResult(data) {
         <div class="bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/30 rounded-2xl p-6 mb-6">
           <div class="flex items-center gap-2 mb-4">
             <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
-            <h3 class="text-xl font-bold text-purple-300">AI ì¢…í•© ë¶„ì„ (Gemini)</h3>
+            <h3 class="text-xl font-bold text-purple-300">AI Á¾ÇÕ ºĞ¼® (Gemini)</h3>
           </div>
           <div class="bg-dark-card/50 rounded-lg p-4 mb-4"><p class="text-lg leading-relaxed">${llmData.summary}</p></div>
           <div class="grid grid-cols-2 gap-4 mb-4">
             <div class="bg-dark-card/50 p-4 rounded-lg">
-              <p class="text-sm text-gray-400 mb-1">AI ìœ„í—˜ë„ ì ìˆ˜</p>
+              <p class="text-sm text-gray-400 mb-1">AI À§Çèµµ Á¡¼ö</p>
               <div class="flex items-center gap-3">
                 <div class="flex-1 bg-gray-700 rounded-full h-2"><div class="bg-${llmColor}-500 h-2 rounded-full" style="width: ${llmData.risk_score}%"></div></div>
                 <span class="text-2xl font-bold">${llmData.risk_score}</span>
               </div>
             </div>
             <div class="bg-dark-card/50 p-4 rounded-lg">
-              <p class="text-sm text-gray-400 mb-1">ìœ„í—˜ ìˆ˜ì¤€</p>
+              <p class="text-sm text-gray-400 mb-1">À§Çè ¼öÁØ</p>
               <span class="inline-block px-4 py-1 rounded-full text-lg font-medium bg-${llmColor}-500/20 text-${llmColor}-400 border border-${llmColor}-500/50">${llmData.risk_level.toUpperCase()}</span>
             </div>
           </div>
-          ${llmData.reasons && llmData.reasons.length > 0 ? `<div class="mb-4"><h4 class="text-sm font-semibold text-purple-300 mb-2">ğŸ” ì£¼ìš” ìœ„í—˜ ìš”ì¸</h4><ul class="space-y-2">${llmData.reasons.map(r => `<li class="flex items-start gap-2 text-sm"><span class="text-purple-400">â€¢</span><span>${r}</span></li>`).join('')}</ul></div>` : ''}
-          ${llmData.recommended_actions && llmData.recommended_actions.length > 0 ? `<div><h4 class="text-sm font-semibold text-purple-300 mb-2">âœ… ê¶Œì¥ ì¡°ì¹˜</h4><ul class="space-y-2">${llmData.recommended_actions.map(a => `<li class="flex items-start gap-2 text-sm"><span class="text-blue-400">â€¢</span><span>${a}</span></li>`).join('')}</ul></div>` : ''}
+          ${llmData.reasons && llmData.reasons.length > 0 ? `<div class="mb-4"><h4 class="text-sm font-semibold text-purple-300 mb-2">?? ÁÖ¿ä À§Çè ¿äÀÎ</h4><ul class="space-y-2">${llmData.reasons.map(r => `<li class="flex items-start gap-2 text-sm"><span class="text-purple-400">?</span><span>${r}</span></li>`).join('')}</ul></div>` : ''}
+          ${llmData.recommended_actions && llmData.recommended_actions.length > 0 ? `<div><h4 class="text-sm font-semibold text-purple-300 mb-2">? ±ÇÀå Á¶Ä¡</h4><ul class="space-y-2">${llmData.recommended_actions.map(a => `<li class="flex items-start gap-2 text-sm"><span class="text-blue-400">?</span><span>${a}</span></li>`).join('')}</ul></div>` : ''}
         </div>
       `;
     }
@@ -151,16 +314,20 @@ function displayResult(data) {
       ${geminiHtml}
       <div class="space-y-6">
         <div class="flex justify-between items-center">
-          <div><p class="text-sm text-gray-400">íŒŒì¼ëª…</p><p class="text-lg font-medium">${analysis.file_name}</p></div>
-          <div class="text-right"><p class="text-sm text-gray-400">ë¶„ì„ ì™„ë£Œ</p><span class="inline-block px-4 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/50">SUCCESS</span></div>
+          <div><p class="text-sm text-gray-400">ÆÄÀÏ¸í</p><p class="text-lg font-medium">${analysis.file_name}</p></div>
+          <div class="text-right"><p class="text-sm text-gray-400">ºĞ¼® ¿Ï·á</p><span class="inline-block px-4 py-1 rounded-full text-sm font-medium bg-green-500/20 text-green-400 border border-green-500/50">SUCCESS</span></div>
         </div>
-        <div class="mt-6"><details class="bg-dark-bg rounded-lg"><summary class="cursor-pointer p-4 font-semibold hover:bg-dark-bg/50">ğŸ“„ ìƒì„¸ ë¶„ì„ ê²°ê³¼ ë³´ê¸°</summary><div class="p-4 border-t border-dark-border"><pre class="text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto">${scriptOutput}</pre></div></details></div>
+        <div class="mt-6"><details class="bg-dark-bg rounded-lg"><summary class="cursor-pointer p-4 font-semibold hover:bg-dark-bg/50">?? »ó¼¼ ºĞ¼® °á°ú º¸±â</summary><div class="p-4 border-t border-dark-border"><pre class="text-sm text-gray-300 whitespace-pre-wrap overflow-x-auto">${scriptOutput}</pre></div></details></div>
       </div>
     `;
   }
   
   result.classList.remove('hidden');
+  result.scrollIntoView({ behavior: 'smooth' });
 }
+
+// ÆäÀÌÁö ·Îµå ½Ã ÀÎÁõ È®ÀÎ
+checkAuth();
 </script>
 
 </body>
